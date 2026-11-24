@@ -19,6 +19,7 @@ import {
   CheckCircle,
   Zap,
 } from "lucide-react";
+import { ArchitecturalHeroPreview } from "@/components/home/ArchitecturalHeroPreview";
 
 export default function LandingPage() {
   const router = useRouter();
@@ -141,59 +142,10 @@ export default function LandingPage() {
           </div>
 
           {/* Interactive Hero Graphic Showcase */}
-          <div className="mt-14 mx-auto max-w-5xl rounded-2xl border border-slate-200/90 bg-white p-3 shadow-2xl shadow-slate-200/50">
-            <div className="overflow-hidden rounded-xl border border-slate-100 bg-slate-900/5 p-6 sm:p-10 relative">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="rounded-xl bg-white p-5 shadow-sm border border-slate-200/60">
-                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Living Room</span>
-                    <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">24.5 m²</span>
-                  </div>
-                  <div className="mt-4 flex items-center justify-center h-32 rounded-lg border-2 border-dashed border-slate-200 bg-slate-50/50">
-                    <div className="text-center">
-                      <LayoutGrid className="mx-auto h-8 w-8 text-brand-500" />
-                      <p className="mt-1 text-xs font-medium text-slate-600">3-Seater Sofa &amp; Coffee Table</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-xl bg-white p-5 shadow-sm border border-slate-200/60">
-                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Master Bedroom</span>
-                    <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">18.2 m²</span>
-                  </div>
-                  <div className="mt-4 flex items-center justify-center h-32 rounded-lg border-2 border-dashed border-slate-200 bg-slate-50/50">
-                    <div className="text-center">
-                      <Compass className="mx-auto h-8 w-8 text-indigo-500" />
-                      <p className="mt-1 text-xs font-medium text-slate-600">King Bed &amp; Nightstands</p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="rounded-xl bg-white p-5 shadow-sm border border-slate-200/60">
-                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Kitchen &amp; Dining</span>
-                    <span className="rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">14.8 m²</span>
-                  </div>
-                  <div className="mt-4 flex items-center justify-center h-32 rounded-lg border-2 border-dashed border-slate-200 bg-slate-50/50">
-                    <div className="text-center">
-                      <Ruler className="mx-auto h-8 w-8 text-violet-500" />
-                      <p className="mt-1 text-xs font-medium text-slate-600">Dining Table &amp; Kitchen Island</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-lg bg-white px-5 py-3 border border-slate-200/80 text-xs text-slate-600">
-                <div className="flex items-center gap-4">
-                  <span className="flex items-center gap-1.5 font-medium"><CheckCircle className="h-4 w-4 text-emerald-500" /> Dynamic 2D Canvas</span>
-                  <span className="flex items-center gap-1.5 font-medium"><CheckCircle className="h-4 w-4 text-emerald-500" /> Metric &amp; Imperial</span>
-                  <span className="flex items-center gap-1.5 font-medium"><CheckCircle className="h-4 w-4 text-emerald-500" /> Collision Warnings</span>
-                </div>
-                <div className="font-mono text-slate-400">RoomSketch Engine v1.0</div>
-              </div>
-            </div>
-          </div>
+          <ArchitecturalHeroPreview
+            onOpenEditor={handleInstantDemoLogin}
+            isLoading={isLoggingIn}
+          />
         </div>
       </section>
 
