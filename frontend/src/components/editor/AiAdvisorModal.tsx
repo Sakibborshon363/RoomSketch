@@ -11,6 +11,8 @@ import {
   ArchitecturalAuditReport,
   ErgonomicsIssue,
 } from "@/lib/aiArchitectEngine";
+import { autoFixAllErgonomicIssues } from "@/lib/aiCopilotEngine";
+import { validateLayout } from "@/lib/collisionDetection";
 import {
   Sparkles,
   ShieldCheck,
@@ -37,6 +39,7 @@ interface AiAdvisorModalProps {
   doorsWindows: DoorWindowItem[];
   furniture: FurnitureItem[];
   onApplyAutoFurnish: (items: FurnitureItem[], roomName: string) => void;
+  onAutoFixAll?: (fixedFurniture: FurnitureItem[], fixesCount: number) => void;
 }
 
 const AI_CONSULTANT_TOPICS = [
@@ -75,17 +78,42 @@ export function AiAdvisorModal({
   doorsWindows,
   furniture,
   onApplyAutoFurnish,
+  onAutoFixAll,
 }: AiAdvisorModalProps) {
   const [activeTab, setActiveTab] = useState<"audit" | "autofurnish" | "assistant">("audit");
   const [selectedRoomId, setSelectedRoomId] = useState<string>(rooms[0]?.id || "");
   const [selectedStyle, setSelectedStyle] = useState<DesignStylePreset>("SCANDINAVIAN");
   const [selectedTopicIndex, setSelectedTopicIndex] = useState<number>(0);
   const [autoFurnishSuccess, setAutoFurnishSuccess] = useState<string | null>(null);
+  const [autoFixSuccess, setAutoFixSuccess] = useState<string | null>(null);
 
   // Compute live architectural ergonomics audit
   const auditReport: ArchitecturalAuditReport = useMemo(() => {
     return runArchitecturalAudit(rooms, doorsWindows, furniture);
   }, [rooms, doorsWindows, furniture]);
+
+  const layoutValidation = useMemo(() => {
+    return validateLayout(rooms, furniture, doorsWindows);
+  }, [rooms, furniture, doorsWindows]);
+
+  const totalViolations =
+    auditReport.criticalCount + auditReport.warningCount + layoutValidation.warnings.length;
+
+  const handleAutoFixCollisionsAndWarnings = () => {
+    const { fixedFurniture, fixesApplied, newAuditReport } = autoFixAllErgonomicIssues(
+      rooms,
+      doorsWindows,
+      furniture
+    );
+
+    if (onAutoFixAll) {
+      onAutoFixAll(fixedFurniture, fixesApplied.length);
+    }
+    setAutoFixSuccess(
+      `Resolved ${fixesApplied.length} physical collision(s) & clearance issue(s)! Score upgraded to ${newAuditReport.score}%.`
+    );
+    setTimeout(() => setAutoFixSuccess(null), 5000);
+  };
 
   const targetRoom = useMemo(() => {
     return rooms.find((r) => r.id === selectedRoomId) || rooms[0];
@@ -168,6 +196,38 @@ export function AiAdvisorModal({
         {/* TAB 1: ERGONOMICS & CODE AUDIT */}
         {activeTab === "audit" && (
           <div className="space-y-5">
+            {autoFixSuccess && (
+              <div className="p-3.5 rounded-xl bg-emerald-100 border border-emerald-300 text-emerald-950 text-xs font-bold flex items-center gap-2.5 animate-in fade-in">
+                <CheckCircle2 className="h-5 w-5 text-emerald-700 shrink-0" />
+                <span>{autoFixSuccess}</span>
+              </div>
+            )}
+
+            {/* 1-Click Autonomous Collision & Warning Resolution Banner */}
+            {totalViolations > 0 && (
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-xl border border-rose-200 bg-rose-50/80 shadow-xs">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="h-5 w-5 text-rose-600 shrink-0 mt-0.5" />
+                  <div>
+                    <h5 className="text-xs font-bold text-rose-950">
+                      {totalViolations} Collision Overlap & Layout Warning{totalViolations === 1 ? "" : "s"} Detected
+                    </h5>
+                    <p className="text-[11px] text-rose-700 mt-0.5 leading-relaxed">
+                      Physical furniture overlaps, wall boundary crossings, or doorway swing arc blockages found.
+                    </p>
+                  </div>
+                </div>
+
+                <Button
+                  onClick={handleAutoFixCollisionsAndWarnings}
+                  className="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs gap-1.5 shrink-0 shadow-sm"
+                >
+                  <Wand2 className="h-4 w-4" />
+                  <span>1-Click Auto-Fix All</span>
+                </Button>
+              </div>
+            )}
+
             {/* Health Score Overview Card */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
               <div className="p-4 rounded-xl border border-stone-200 bg-stone-50/70 flex flex-col items-center justify-center text-center">

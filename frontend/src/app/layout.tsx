@@ -3,8 +3,8 @@ import "./globals.css";
 import { ToastProvider } from "@/components/ui/Toast";
 
 export const metadata: Metadata = {
-  title: "RoomSketch | Professional 2D Interior Design & Floor Planning",
-  description: "Browser-based 2D interior design, room layout planning, and architectural floor plan tool.",
+  title: "RoomSketch | Professional 2D & 3D Architectural CAD & Interior Planning",
+  description: "Browser-based 2D & 3D interior design, spatial layout planning, Three.js WebGL visualization, and architectural floor plan platform.",
 };
 
 export default function RootLayout({

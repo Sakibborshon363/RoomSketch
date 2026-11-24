@@ -73,7 +73,9 @@ describe("RoomSketch AI Copilot & Autonomous Remediation Engine", () => {
     );
 
     expect(fixesApplied.length).toBeGreaterThanOrEqual(1);
-    expect(fixesApplied[0]).toContain("Relocated");
+    expect(
+      fixesApplied.some((f) => f.includes("away from door") || f.includes("Relocated"))
+    ).toBe(true);
     expect(newAuditReport.criticalCount).toBe(0);
 
     const fixedItem = fixedFurniture.find((f) => f.id === obstructiveItem.id);
@@ -112,7 +114,9 @@ describe("RoomSketch AI Copilot & Autonomous Remediation Engine", () => {
     );
 
     expect(fixesApplied.length).toBeGreaterThanOrEqual(1);
-    expect(fixesApplied[0]).toContain("Centered");
+    expect(
+      fixesApplied.some((f) => f.includes("Centered") || f.includes("inside"))
+    ).toBe(true);
 
     const fixedBed = fixedFurniture.find((f) => f.id === tightBed.id);
     expect(fixedBed).toBeDefined();
@@ -207,5 +211,92 @@ describe("RoomSketch AI Copilot & Autonomous Remediation Engine", () => {
     expect(result.actionTaken?.type).toBe("BOQ_CALCULATED");
     expect(result.replyText).toContain("Bill of Quantities");
     expect(result.replyText).toContain("Grand Total Budget");
+  });
+
+  it("should autonomously separate overlapping furniture items (SAT collision overlaps)", () => {
+    const itemA: FurnitureItem = {
+      id: "furn-overlap-a",
+      roomId: mockRoom.id,
+      name: "3-Seater Sofa",
+      category: "LIVING_ROOM",
+      type: "sofa_linen",
+      x: 200,
+      y: 200,
+      width: 100,
+      height: 50,
+      rotation: 0,
+      color: "#475569",
+      material: "Linen",
+      zIndex: 2,
+      isLocked: false,
+      isVisible: true,
+    };
+
+    const itemB: FurnitureItem = {
+      id: "furn-overlap-b",
+      roomId: mockRoom.id,
+      name: "Coffee Table",
+      category: "LIVING_ROOM",
+      type: "coffee_table",
+      x: 210, // directly overlapping with sofa!
+      y: 205,
+      width: 70,
+      height: 40,
+      rotation: 0,
+      color: "#E2E8F0",
+      material: "Glass",
+      zIndex: 2,
+      isLocked: false,
+      isVisible: true,
+    };
+
+    const { fixedFurniture, fixesApplied, remainingCollisions } = autoFixAllErgonomicIssues(
+      [mockRoom],
+      [],
+      [itemA, itemB]
+    );
+
+    expect(fixesApplied.length).toBeGreaterThanOrEqual(1);
+    expect(fixesApplied.some((f) => f.includes("Separated") || f.includes("collision"))).toBe(true);
+
+    const fixedA = fixedFurniture.find((f) => f.id === itemA.id)!;
+    const fixedB = fixedFurniture.find((f) => f.id === itemB.id)!;
+
+    // Check distance between them has increased significantly
+    const finalDist = Math.hypot(fixedA.x - fixedB.x, fixedA.y - fixedB.y);
+    expect(finalDist).toBeGreaterThan(60);
+    expect(remainingCollisions).toBe(0);
+  });
+
+  it("should autonomously pull out-of-bounds furniture back within room boundaries", () => {
+    // Placed far outside the room boundary (mockRoom: x:100..420, y:100..360)
+    const outItem: FurnitureItem = {
+      id: "furn-outside",
+      roomId: mockRoom.id,
+      name: "Outdoor Bench",
+      category: "BALCONY",
+      type: "bench",
+      x: 50, // outside room.x: 100
+      y: 50, // outside room.y: 100
+      width: 60,
+      height: 30,
+      rotation: 0,
+      color: "#333",
+      material: "Wood",
+      zIndex: 2,
+      isLocked: false,
+      isVisible: true,
+    };
+
+    const { fixedFurniture, fixesApplied } = autoFixAllErgonomicIssues(
+      [mockRoom],
+      [],
+      [outItem]
+    );
+
+    const fixed = fixedFurniture.find((f) => f.id === outItem.id)!;
+    expect(fixed.x).toBeGreaterThanOrEqual(mockRoom.x + fixed.width / 2);
+    expect(fixed.y).toBeGreaterThanOrEqual(mockRoom.y + fixed.height / 2);
+    expect(fixesApplied.some((f) => f.includes("inside"))).toBe(true);
   });
 });

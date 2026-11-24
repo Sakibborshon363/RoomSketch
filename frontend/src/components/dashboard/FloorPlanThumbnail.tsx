@@ -141,7 +141,7 @@ export function FloorPlanThumbnail({ name = "", thumbnailData, className = "" }:
 
       {/* Modern Badge Overlay */}
       <div className="absolute bottom-2 left-2.5 z-20 flex items-center gap-1.5 rounded-md bg-stone-900/80 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
-        <span>2D Architectural CAD</span>
+        <span>2D & 3D Architectural CAD</span>
       </div>
     </div>
   );

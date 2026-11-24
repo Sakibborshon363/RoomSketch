@@ -8,6 +8,7 @@ import {
   autoFixAllErgonomicIssues,
 } from "@/lib/aiCopilotEngine";
 import { runArchitecturalAudit } from "@/lib/aiArchitectEngine";
+import { validateLayout } from "@/lib/collisionDetection";
 import {
   Sparkles,
   Send,
@@ -57,12 +58,17 @@ export function AiCopilotDrawer({
   const [isProcessing, setIsProcessing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Live compliance check for badge alert
+  // Live compliance & physical SAT collision check for badge alert
   const auditReport = useMemo(() => {
     return runArchitecturalAudit(rooms, doorsWindows, furniture);
   }, [rooms, doorsWindows, furniture]);
 
-  const totalWarnings = auditReport.criticalCount + auditReport.warningCount;
+  const layoutValidation = useMemo(() => {
+    return validateLayout(rooms, furniture, doorsWindows);
+  }, [rooms, furniture, doorsWindows]);
+
+  const totalWarnings =
+    auditReport.criticalCount + auditReport.warningCount + layoutValidation.warnings.length;
 
   // Initial welcome message
   const [messages, setMessages] = useState<CopilotMessage[]>([
@@ -198,6 +204,22 @@ export function AiCopilotDrawer({
               </button>
             </div>
           </div>
+
+          {/* Active Collision Alert & 1-Click Resolve Header Banner */}
+          {totalWarnings > 0 && (
+            <div className="flex items-center justify-between gap-2 border-b border-rose-200 bg-rose-50 px-3.5 py-2 text-xs">
+              <div className="flex items-center gap-2 text-rose-900 font-bold">
+                <AlertTriangle className="h-4 w-4 text-rose-600 shrink-0" />
+                <span>{totalWarnings} Collision{totalWarnings === 1 ? "" : "s"} & Layout Issue{totalWarnings === 1 ? "" : "s"}</span>
+              </div>
+              <button
+                onClick={() => handleQuickAction("Fix all collisions and warnings")}
+                className="inline-flex items-center gap-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white px-2.5 py-1 text-[11px] font-bold shadow-xs transition-colors shrink-0"
+              >
+                <Wand2 className="h-3 w-3" /> 1-Click Fix
+              </button>
+            </div>
+          )}
 
           {/* Quick Action Suggestion Chips */}
           <div className="flex items-center gap-1.5 overflow-x-auto border-b border-stone-100 bg-stone-50/80 px-3 py-2 text-[11px] no-scrollbar">

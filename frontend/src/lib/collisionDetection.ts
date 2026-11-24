@@ -244,3 +244,199 @@ export function validateLayout(
     isValid: warnings.length === 0,
   };
 }
+
+/**
+ * Autonomous Physics-Based Layout & Collision Resolution Engine
+ * Automatically separates overlapping furniture items (SAT collisions),
+ * pulls out-of-bounds items back into room boundaries, and clears doorway egress paths.
+ */
+export function resolveAllLayoutCollisions(
+  rooms: RoomItem[],
+  furniture: FurnitureItem[],
+  doorsWindows: DoorWindowItem[] = []
+): {
+  resolvedFurniture: FurnitureItem[];
+  actionsCount: number;
+  actionMessages: string[];
+  remainingCollisions: number;
+} {
+  let currentFurniture = furniture.map((f) => ({ ...f }));
+  const actionMessages: string[] = [];
+
+  const MAX_ITERATIONS = 12;
+  let iteration = 0;
+
+  while (iteration < MAX_ITERATIONS) {
+    iteration++;
+    const validation = validateLayout(rooms, currentFurniture, doorsWindows);
+
+    if (validation.warnings.length === 0) {
+      break;
+    }
+
+    let modifiedInPass = false;
+
+    // 1. Pull out-of-bounds items inside room boundaries
+    for (const item of currentFurniture) {
+      if (item.isLocked) continue;
+
+      // Find enclosing or nearest room
+      let room = rooms.find((r) => r.id === item.roomId);
+      if (!room && rooms.length > 0) {
+        let minDist = Infinity;
+        for (const r of rooms) {
+          const d = Math.hypot(item.x - (r.x + r.width / 2), item.y - (r.y + r.height / 2));
+          if (d < minDist) {
+            minDist = d;
+            room = r;
+          }
+        }
+      }
+
+      if (room) {
+        const minX = room.x + item.width / 2 + 10;
+        const maxX = room.x + room.width - item.width / 2 - 10;
+        const minY = room.y + item.height / 2 + 10;
+        const maxY = room.y + room.height - item.height / 2 - 10;
+
+        const clampedX = Math.max(minX, Math.min(maxX, item.x));
+        const clampedY = Math.max(minY, Math.min(maxY, item.y));
+
+        if (clampedX !== item.x || clampedY !== item.y) {
+          item.x = Math.round(clampedX / 5) * 5;
+          item.y = Math.round(clampedY / 5) * 5;
+          item.roomId = room.id;
+          modifiedInPass = true;
+          if (iteration === 1) {
+            actionMessages.push(`Moved "${item.name}" safely inside "${room.name}" boundaries.`);
+          }
+        }
+      }
+    }
+
+    // 2. Separate overlapping furniture pairs (SAT)
+    const activeFurniture = currentFurniture.filter((f) => f.isVisible !== false && !isRugItem(f));
+    const cornerMap = new Map<string, Point[]>();
+    for (const item of activeFurniture) {
+      cornerMap.set(
+        item.id,
+        getRotatedBoxCorners(item.x, item.y, item.width, item.height, item.rotation || 0)
+      );
+    }
+
+    for (let i = 0; i < activeFurniture.length; i++) {
+      const itemA = activeFurniture[i];
+      const cornersA = cornerMap.get(itemA.id)!;
+
+      for (let j = i + 1; j < activeFurniture.length; j++) {
+        const itemB = activeFurniture[j];
+        const cornersB = cornerMap.get(itemB.id)!;
+
+        if (satPolygonsIntersect(cornersA, cornersB)) {
+          // Compute separation vector
+          let dx = itemB.x - itemA.x;
+          let dy = itemB.y - itemA.y;
+          let dist = Math.hypot(dx, dy);
+
+          let nx = 1;
+          let ny = 0;
+          if (dist > 0.001) {
+            nx = dx / dist;
+            ny = dy / dist;
+          } else {
+            const angle = ((i + j) * 45 * Math.PI) / 180;
+            nx = Math.cos(angle);
+            ny = Math.sin(angle);
+            dist = 0;
+          }
+
+          const reqDist = (Math.max(itemA.width, itemA.height) + Math.max(itemB.width, itemB.height)) / 2 + 20;
+          const pushDist = Math.max(reqDist - dist, 30);
+
+          const roomA = rooms.find((r) => r.id === itemA.roomId);
+          const roomB = rooms.find((r) => r.id === itemB.roomId);
+
+          if (!itemB.isLocked) {
+            let newBx = itemB.x + nx * pushDist * 0.6;
+            let newBy = itemB.y + ny * pushDist * 0.6;
+            if (roomB) {
+              newBx = Math.max(roomB.x + itemB.width / 2 + 10, Math.min(roomB.x + roomB.width - itemB.width / 2 - 10, newBx));
+              newBy = Math.max(roomB.y + itemB.height / 2 + 10, Math.min(roomB.y + roomB.height - itemB.height / 2 - 10, newBy));
+            }
+            itemB.x = Math.round(newBx / 5) * 5;
+            itemB.y = Math.round(newBy / 5) * 5;
+            modifiedInPass = true;
+          }
+
+          if (!itemA.isLocked) {
+            let newAx = itemA.x - nx * pushDist * 0.6;
+            let newAy = itemA.y - ny * pushDist * 0.6;
+            if (roomA) {
+              newAx = Math.max(roomA.x + itemA.width / 2 + 10, Math.min(roomA.x + roomA.width - itemA.width / 2 - 10, newAx));
+              newAy = Math.max(roomA.y + itemA.height / 2 + 10, Math.min(roomA.y + roomA.height - itemA.height / 2 - 10, newAy));
+            }
+            itemA.x = Math.round(newAx / 5) * 5;
+            itemA.y = Math.round(newAy / 5) * 5;
+            modifiedInPass = true;
+          }
+
+          if (iteration === 1) {
+            actionMessages.push(
+              `Separated "${itemA.name}" and "${itemB.name}" by ${Math.round(pushDist)}px to eliminate collision overlap.`
+            );
+          }
+
+          // Update corners
+          cornerMap.set(
+            itemA.id,
+            getRotatedBoxCorners(itemA.x, itemA.y, itemA.width, itemA.height, itemA.rotation || 0)
+          );
+          cornerMap.set(
+            itemB.id,
+            getRotatedBoxCorners(itemB.x, itemB.y, itemB.width, itemB.height, itemB.rotation || 0)
+          );
+        }
+      }
+    }
+
+    if (!modifiedInPass) break;
+  }
+
+  // 3. Clear Doorway Egress Arcs
+  const doors = doorsWindows.filter((dw) => (dw.type || "").toUpperCase().includes("DOOR"));
+  doors.forEach((door) => {
+    const requiredRadius = (door.width || 45) + 25;
+    currentFurniture.forEach((item) => {
+      if (item.isLocked) return;
+      const dist = Math.hypot(item.x - door.x, item.y - door.y);
+      if (dist < requiredRadius) {
+        const room = rooms.find(
+          (r) => door.x >= r.x && door.x <= r.x + r.width && door.y >= r.y && door.y <= r.y + r.height
+        );
+        if (room) {
+          const roomCenterX = room.x + room.width / 2;
+          const roomCenterY = room.y + room.height / 2;
+          const angle = Math.atan2(roomCenterY - door.y, roomCenterX - door.x);
+          let newX = door.x + Math.cos(angle) * (requiredRadius + 20);
+          let newY = door.y + Math.sin(angle) * (requiredRadius + 20);
+
+          newX = Math.max(room.x + item.width / 2 + 10, Math.min(room.x + room.width - item.width / 2 - 10, newX));
+          newY = Math.max(room.y + item.height / 2 + 10, Math.min(room.y + room.height - item.height / 2 - 10, newY));
+
+          item.x = Math.round(newX / 5) * 5;
+          item.y = Math.round(newY / 5) * 5;
+          actionMessages.push(`Moved "${item.name}" 85cm away from door "${door.name}" swing path.`);
+        }
+      }
+    });
+  });
+
+  const finalValidation = validateLayout(rooms, currentFurniture, doorsWindows);
+
+  return {
+    resolvedFurniture: currentFurniture,
+    actionsCount: actionMessages.length,
+    actionMessages,
+    remainingCollisions: finalValidation.warnings.length,
+  };
+}

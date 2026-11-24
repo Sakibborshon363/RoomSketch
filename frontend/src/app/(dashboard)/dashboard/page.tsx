@@ -177,7 +177,7 @@ export default function DashboardPage() {
               <div>
                 <div className="inline-flex items-center gap-1.5 rounded-full bg-stone-100 px-3 py-1 text-xs font-bold text-stone-700 mb-3 border border-stone-200/60">
                   <Sparkles className="h-3.5 w-3.5 text-[#2D5A50]" />
-                  Architectural 2D Space Planning
+                  Architectural 2D & 3D CAD Planning
                 </div>
                 <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-900">
                   Welcome to RoomSketch, {user?.firstName}

@@ -231,7 +231,7 @@ export default function LandingPage() {
           <div className="flex items-center gap-2">
             <Compass className="h-5 w-5 text-brand-600" />
             <span className="font-bold text-slate-900">RoomSketch</span>
-            <span className="text-slate-400">| Professional 2D Architectural CAD Platform</span>
+            <span className="text-slate-400">| Professional 2D & 3D Architectural CAD Platform</span>
           </div>
           <p>© {new Date().getFullYear()} RoomSketch. All rights reserved.</p>
         </div>

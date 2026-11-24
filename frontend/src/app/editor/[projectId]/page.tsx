@@ -464,6 +464,10 @@ export default function EditorPage() {
           doorsWindows={doorsWindows}
           furniture={furniture}
           onApplyAutoFurnish={handleApplyAutoFurnish}
+          onAutoFixAll={(fixedFurniture, count) => {
+            useEditorStore.getState().setFurnitureList(fixedFurniture);
+            success("Autonomous Fix Applied", `Resolved ${count} layout collision(s) & clearance issues.`);
+          }}
         />
 
         {/* RoomSketch AI Architectural Copilot Chatbot */}

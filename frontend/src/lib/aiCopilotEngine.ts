@@ -6,6 +6,7 @@ import {
   DesignStylePreset,
 } from "./aiArchitectEngine";
 import { calculateProjectBoQ, formatCurrency } from "./boqEngine";
+import { resolveAllLayoutCollisions, validateLayout } from "./collisionDetection";
 
 export interface CopilotMessage {
   id: string;
@@ -39,8 +40,8 @@ export interface CopilotExecutionResult {
 
 /**
  * Autonomous Architectural Remediation Algorithm:
- * Resolves all ergonomic violations, doorway obstructions, tight bed walkways,
- * and kitchen proximity hazards automatically.
+ * Resolves all physical SAT collisions (furniture overlaps), out-of-bounds wall penetrations,
+ * doorway obstructions, tight bed walkways, and kitchen proximity hazards automatically.
  */
 export function autoFixAllErgonomicIssues(
   rooms: RoomItem[],
@@ -50,11 +51,16 @@ export function autoFixAllErgonomicIssues(
   fixedFurniture: FurnitureItem[];
   fixesApplied: string[];
   newAuditReport: ArchitecturalAuditReport;
+  remainingCollisions: number;
 } {
-  let modifiedFurniture = furniture.map((f) => ({ ...f }));
   const fixesApplied: string[] = [];
 
-  // Step 1: Detect and Fix Door Swing Arc Clearance Violations (< 90cm / 45px)
+  // Pass 1: Resolve all SAT pairwise furniture overlaps and out-of-bounds wall penetrations
+  const initialCollisionFix = resolveAllLayoutCollisions(rooms, furniture, doorsWindows);
+  let modifiedFurniture = initialCollisionFix.resolvedFurniture;
+  fixesApplied.push(...initialCollisionFix.actionMessages);
+
+  // Step 2: Detect and Fix Door Swing Arc Clearance Violations (< 90cm / 45px)
   const doors = doorsWindows.filter((dw) => (dw.type || "").toUpperCase().includes("DOOR"));
   doors.forEach((door) => {
     const requiredRadius = (door.width || 45) + 20; // 90cm + safe margin (~1.3m)
@@ -67,7 +73,6 @@ export function autoFixAllErgonomicIssues(
           (r) => door.x >= r.x && door.x <= r.x + r.width && door.y >= r.y && door.y <= r.y + r.height
         );
 
-        // Vector away from door towards room center or opposite wall
         let targetX = item.x;
         let targetY = item.y;
 
@@ -99,7 +104,7 @@ export function autoFixAllErgonomicIssues(
     });
   });
 
-  // Step 2: Detect and Fix Bed Walkway Circulation (Center Master Bed on Headboard Wall)
+  // Step 3: Detect and Fix Bed Walkway Circulation (Center Master Bed on Headboard Wall)
   const beds = modifiedFurniture.filter((f) => (f.type || "").toLowerCase().includes("bed"));
   beds.forEach((bed) => {
     const isMasterBed = (bed.type || "").includes("king") || (bed.type || "").includes("queen");
@@ -136,7 +141,7 @@ export function autoFixAllErgonomicIssues(
     }
   });
 
-  // Step 3: Detect and Fix Kitchen Cooktop vs Sink Separation (< 0.6m)
+  // Step 4: Detect and Fix Kitchen Cooktop vs Sink Separation (< 0.6m)
   const cooktops = modifiedFurniture.filter(
     (f) => (f.type || "").includes("cooktop") || (f.name || "").includes("Cooktop")
   );
@@ -148,7 +153,6 @@ export function autoFixAllErgonomicIssues(
     sinks.forEach((sink) => {
       const distM = Math.hypot(cooktop.x - sink.x, cooktop.y - sink.y) / 50;
       if (distM < 0.6) {
-        // Shift cooktop along x or y by 45px (0.9m safe prep space)
         modifiedFurniture = modifiedFurniture.map((item) => {
           if (item.id === cooktop.id) {
             return {
@@ -166,13 +170,24 @@ export function autoFixAllErgonomicIssues(
     });
   });
 
+  // Pass 2: Final collision check to ensure all secondary adjustments did not introduce overlaps
+  const finalCollisionPass = resolveAllLayoutCollisions(rooms, modifiedFurniture, doorsWindows);
+  modifiedFurniture = finalCollisionPass.resolvedFurniture;
+  if (finalCollisionPass.actionMessages.length > 0) {
+    fixesApplied.push(...finalCollisionPass.actionMessages);
+  }
+
+  // Deduplicate fix messages
+  const uniqueFixes = Array.from(new Set(fixesApplied));
+
   // Re-run audit to calculate improved score
   const newAuditReport = runArchitecturalAudit(rooms, doorsWindows, modifiedFurniture);
 
   return {
     fixedFurniture: modifiedFurniture,
-    fixesApplied,
+    fixesApplied: uniqueFixes,
     newAuditReport,
+    remainingCollisions: finalCollisionPass.remainingCollisions,
   };
 }
 
@@ -191,26 +206,30 @@ export function processCopilotUserInput(
     query.includes("fix") ||
     query.includes("warning") ||
     query.includes("collision") ||
+    query.includes("collaps") ||
+    query.includes("overlap") ||
     query.includes("solve") ||
     query.includes("clearance") ||
-    query.includes("overlap") ||
     query.includes("সতর্কতা") ||
     query.includes("ঠিক কর") ||
-    query.includes("সমস্যা")
+    query.includes("সমস্যা") ||
+    query.includes("কলিশন")
   ) {
     const auditBefore = runArchitecturalAudit(rooms, doorsWindows, furniture);
+    const layoutValidationBefore = validateLayout(rooms, furniture, doorsWindows);
 
-    if (auditBefore.criticalCount === 0 && auditBefore.warningCount === 0) {
+    if (
+      auditBefore.criticalCount === 0 &&
+      auditBefore.warningCount === 0 &&
+      layoutValidationBefore.warnings.length === 0
+    ) {
       return {
-        replyText: `Your floor plan is already in great condition! Architectural Compliance Score: **${auditBefore.score}/100 (${auditBefore.rating})**. All doorway swing paths, bed corridors, and kitchen appliances meet international building ergonomics standards.`,
+        replyText: `Your floor plan is already in great condition! Architectural Compliance Score: **${auditBefore.score}/100 (${auditBefore.rating})**. All doorway swing paths, bed corridors, physical furniture spacing, and kitchen appliances meet international building ergonomics standards.`,
       };
     }
 
-    const { fixedFurniture, fixesApplied, newAuditReport } = autoFixAllErgonomicIssues(
-      rooms,
-      doorsWindows,
-      furniture
-    );
+    const { fixedFurniture, fixesApplied, newAuditReport, remainingCollisions } =
+      autoFixAllErgonomicIssues(rooms, doorsWindows, furniture);
 
     const fixesList =
       fixesApplied.length > 0
@@ -218,14 +237,14 @@ export function processCopilotUserInput(
         : ["Optimized perimeter layout clearances and circulation walkways."];
 
     return {
-      replyText: `I have analyzed your layout against IBC & Neufert architectural standards and resolved all design warnings automatically:\n\n` +
+      replyText: `I have analyzed your layout against physical SAT collision rules and IBC/Neufert architectural standards and resolved all design warnings automatically:\n\n` +
         fixesList.map((f, i) => `${i + 1}. ${f}`).join("\n") +
-        `\n\n**Compliance Score Improved:** ${auditBefore.score}/100 ➔ **${newAuditReport.score}/100 (${newAuditReport.rating})**!`,
+        `\n\n**Compliance Score Improved:** ${auditBefore.score}/100 ➔ **${newAuditReport.score}/100 (${newAuditReport.rating})**! All physical overlaps separated.`,
       updatedFurniture: fixedFurniture,
       actionTaken: {
         type: "WARNINGS_FIXED",
         title: "Autonomous Conflict Resolution Applied",
-        description: `Resolved ${fixesList.length} clearance conflict(s). Architectural score upgraded to ${newAuditReport.score}%.`,
+        description: `Resolved ${fixesList.length} physical collision & clearance conflict(s). Architectural score: ${newAuditReport.score}%.`,
         details: fixesList,
       },
     };

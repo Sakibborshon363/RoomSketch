@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/Input";
 import { formatArea, formatDimension } from "@/lib/utils";
 import { validateLayout } from "@/lib/collisionDetection";
 import { FLOOR_MATERIALS, WALL_FINISHES, FURNITURE_FINISHES } from "@/lib/materialsCatalog";
+import { autoFixAllErgonomicIssues } from "@/lib/aiCopilotEngine";
 import {
   Square,
   Copy,
@@ -26,6 +27,7 @@ import {
   ChevronsDown,
   AlertTriangle,
   DoorOpen,
+  Wand2,
 } from "lucide-react";
 
 export function PropertiesPanel() {
@@ -72,6 +74,12 @@ export function PropertiesPanel() {
   const selectedFurnitureWarnings = selectedFurniture
     ? warnings.filter((w) => w.targetId === selectedFurniture.id || w.otherTargetId === selectedFurniture.id)
     : [];
+
+  const handleAutoFixCollisions = () => {
+    const { rooms, doorsWindows, furniture, setFurnitureList } = useEditorStore.getState();
+    const { fixedFurniture } = autoFixAllErgonomicIssues(rooms, doorsWindows, furniture);
+    setFurnitureList(fixedFurniture);
+  };
 
   // Calculate total footprint area
   const pxToMeters = (px: number) => px * 0.04;
@@ -272,10 +280,19 @@ export function PropertiesPanel() {
 
           {/* Collision Warning Banner (Phase 5 SAT Engine) */}
           {selectedFurnitureWarnings.length > 0 && (
-            <div className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900 space-y-1 animate-in fade-in">
-              <div className="flex items-center gap-1.5 font-bold">
-                <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
-                Layout Validation Alert
+            <div className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900 space-y-2 animate-in fade-in">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 font-bold">
+                  <AlertTriangle className="h-4 w-4 text-amber-600 shrink-0" />
+                  Layout Validation Alert
+                </div>
+                <button
+                  onClick={handleAutoFixCollisions}
+                  className="inline-flex items-center gap-1 rounded-md bg-amber-600 hover:bg-amber-700 text-white px-2 py-0.5 text-[10px] font-bold shadow-xs transition-colors"
+                  title="Automatically separate this item from collisions"
+                >
+                  <Wand2 className="h-3 w-3" /> Auto-Fix
+                </button>
               </div>
               {selectedFurnitureWarnings.map((w) => (
                 <p key={w.id} className="text-[11px] text-amber-800 leading-relaxed">
@@ -652,15 +669,26 @@ export function PropertiesPanel() {
               <span className="text-[10px] font-bold uppercase tracking-wider text-stone-500">
                 Geometric Validation
               </span>
-              {warnings.length === 0 ? (
-                <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
-                  Clean Layout
-                </span>
-              ) : (
-                <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800">
-                  {warnings.length} Warning{warnings.length > 1 ? "s" : ""}
-                </span>
-              )}
+              <div className="flex items-center gap-1.5">
+                {warnings.length > 0 && (
+                  <button
+                    onClick={handleAutoFixCollisions}
+                    className="inline-flex items-center gap-1 rounded-md bg-rose-600 hover:bg-rose-700 text-white px-2 py-0.5 text-[10px] font-bold shadow-xs transition-colors"
+                    title="Automatically separate all colliding furniture"
+                  >
+                    <Wand2 className="h-3 w-3" /> Auto-Fix All
+                  </button>
+                )}
+                {warnings.length === 0 ? (
+                  <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-800">
+                    Clean Layout
+                  </span>
+                ) : (
+                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-800">
+                    {warnings.length} Warning{warnings.length > 1 ? "s" : ""}
+                  </span>
+                )}
+              </div>
             </div>
 
             {warnings.length === 0 ? (
