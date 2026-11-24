@@ -7,6 +7,8 @@ export interface Project {
   createdAt: string;
   updatedAt: string;
   floorCount?: number;
+  roomCount?: number;
+  totalArea?: number;
 }
 
 export interface Floor {

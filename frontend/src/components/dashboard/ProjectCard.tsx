@@ -26,16 +26,24 @@ interface ProjectCardProps {
 export function ProjectCard({ project, onRename, onDuplicate, onDelete }: ProjectCardProps) {
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // Approximate realistic area based on project name if not set
   const projectName = project?.name || "";
   const displayArea =
-    projectName.toLowerCase().includes("garden")
+    project?.totalArea !== undefined && project.totalArea > 0
+      ? project.totalArea
+      : projectName.toLowerCase().includes("garden")
       ? 85.3
       : projectName.toLowerCase().includes("studio")
       ? 42.0
       : 54.0;
 
-  const roomCount = projectName.toLowerCase().includes("garden") ? 5 : 2;
+  const displayRoomCount =
+    project?.roomCount !== undefined && project.roomCount > 0
+      ? project.roomCount
+      : projectName.toLowerCase().includes("garden")
+      ? 5
+      : 2;
+
+  const displayFloorCount = project?.floorCount && project.floorCount > 0 ? project.floorCount : 1;
 
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return "Recently";
@@ -47,7 +55,7 @@ export function ProjectCard({ project, onRename, onDuplicate, onDelete }: Projec
     <div className="group relative flex flex-col rounded-2xl border border-stone-200/90 bg-white p-3.5 shadow-sm hover:shadow-md hover:border-stone-300 transition-all duration-200">
       {/* Thumbnail with Hover Action */}
       <div className="relative overflow-hidden rounded-xl">
-        <FloorPlanThumbnail name={project.name} />
+        <FloorPlanThumbnail name={project.name} thumbnailData={project.thumbnailData} />
         <Link
           href={`/editor/${project.id}`}
           className="absolute inset-0 flex items-center justify-center bg-stone-900/30 opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[2px]"
@@ -128,10 +136,10 @@ export function ProjectCard({ project, onRename, onDuplicate, onDelete }: Projec
             {formatArea(displayArea, project.unitSystem)}
           </span>
           <span className="inline-flex items-center gap-1 rounded-md bg-stone-100/80 px-2 py-0.5 text-xs font-medium text-stone-600 border border-stone-200/60">
-            <LayoutGrid className="h-3 w-3 text-stone-400" /> {roomCount} rooms
+            <LayoutGrid className="h-3 w-3 text-stone-400" /> {displayRoomCount} {displayRoomCount === 1 ? "room" : "rooms"}
           </span>
           <span className="inline-flex items-center gap-1 rounded-md bg-stone-100/80 px-2 py-0.5 text-xs font-medium text-stone-600 border border-stone-200/60">
-            <Layers className="h-3 w-3 text-stone-400" /> 1 floor
+            <Layers className="h-3 w-3 text-stone-400" /> {displayFloorCount} {displayFloorCount === 1 ? "floor" : "floors"}
           </span>
         </div>
 

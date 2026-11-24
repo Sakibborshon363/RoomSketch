@@ -2,10 +2,29 @@ import React from "react";
 
 interface FloorPlanThumbnailProps {
   name: string;
+  thumbnailData?: string;
   className?: string;
 }
 
-export function FloorPlanThumbnail({ name = "", className = "" }: FloorPlanThumbnailProps) {
+export function FloorPlanThumbnail({ name = "", thumbnailData, className = "" }: FloorPlanThumbnailProps) {
+  if (thumbnailData && (thumbnailData.startsWith("data:image/") || thumbnailData.startsWith("http"))) {
+    return (
+      <div
+        className={`relative w-full aspect-[16/10] overflow-hidden rounded-xl bg-[#F9F8F5] border border-stone-200/90 flex items-center justify-center select-none ${className}`}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={thumbnailData}
+          alt={name || "Floor plan preview"}
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute bottom-2 left-2.5 z-20 flex items-center gap-1.5 rounded-md bg-stone-900/80 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
+          <span>Saved Snapshot</span>
+        </div>
+      </div>
+    );
+  }
+
   const isGardenApartment = (name || "").toLowerCase().includes("garden") || (name || "").toLowerCase().includes("apartment");
 
   return (
