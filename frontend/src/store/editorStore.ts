@@ -68,6 +68,7 @@ interface EditorState {
 
   // Room operations
   addRoom: (room: Partial<RoomItem>) => void;
+  addBatchRooms: (rooms: RoomItem[]) => void;
   updateRoom: (id: string, updates: Partial<RoomItem>) => void;
   deleteRoom: (id: string) => void;
   duplicateRoom: (id: string) => void;
@@ -75,6 +76,7 @@ interface EditorState {
   // Furniture operations (Phase 4)
   addFurniture: (item: Partial<FurnitureItem>) => void;
   addBatchFurniture: (items: FurnitureItem[]) => void;
+  setFurnitureList: (items: FurnitureItem[]) => void;
   updateFurniture: (id: string, updates: Partial<FurnitureItem>) => void;
   deleteFurniture: (id: string) => void;
   duplicateFurniture: (id: string) => void;
@@ -492,6 +494,17 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     scheduleAutosave(() => get().saveCurrentLayout(), 1200);
   },
 
+  addBatchRooms: (newRooms) => {
+    if (!newRooms || newRooms.length === 0) return;
+    get().pushHistory();
+    set((state) => ({
+      rooms: [...state.rooms, ...newRooms],
+      saveStatus: "unsaved",
+    }));
+
+    scheduleAutosave(() => get().saveCurrentLayout(), 1200);
+  },
+
   updateRoom: (id, updates) => {
     get().pushHistory();
     set((state) => ({
@@ -584,6 +597,16 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       furniture: [...state.furniture, ...items],
       saveStatus: "unsaved",
     }));
+
+    scheduleAutosave(() => get().saveCurrentLayout(), 1200);
+  },
+
+  setFurnitureList: (items) => {
+    get().pushHistory();
+    set({
+      furniture: items,
+      saveStatus: "unsaved",
+    });
 
     scheduleAutosave(() => get().saveCurrentLayout(), 1200);
   },

@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/Button";
 import { ShortcutsModal } from "@/components/editor/ShortcutsModal";
 import { BoQModal } from "@/components/editor/BoQModal";
 import { AiAdvisorModal } from "@/components/editor/AiAdvisorModal";
+import { AiCopilotDrawer } from "@/components/editor/AiCopilotDrawer";
 import { Loader2, Download, Share2, Copy, Check, ExternalLink, ShieldAlert, Sparkles } from "lucide-react";
 import { api } from "@/lib/api";
 import { exportToHighResPng, exportToArchitecturalPdf } from "@/lib/exportEngine";
@@ -463,6 +464,28 @@ export default function EditorPage() {
           doorsWindows={doorsWindows}
           furniture={furniture}
           onApplyAutoFurnish={handleApplyAutoFurnish}
+        />
+
+        {/* RoomSketch AI Architectural Copilot Chatbot */}
+        <AiCopilotDrawer
+          projectName={projectName}
+          floorName={floorName}
+          rooms={rooms}
+          doorsWindows={doorsWindows}
+          furniture={furniture}
+          unit={unit}
+          onAddRooms={(newRooms) => {
+            useEditorStore.getState().addBatchRooms(newRooms);
+          }}
+          onAddFurniture={(newItems) => {
+            useEditorStore.getState().addBatchFurniture(newItems);
+          }}
+          onUpdateFurnitureList={(updatedList) => {
+            useEditorStore.getState().setFurnitureList(updatedList);
+          }}
+          onNotifySuccess={(title, message) => {
+            success(title, message);
+          }}
         />
       </div>
     </AuthGuard>
