@@ -40,7 +40,7 @@ services:
       - key: BACKEND_URL
         value: https://roomsketch-backend.onrender.com
       - key: NEXT_PUBLIC_API_URL
-        value: https://roomsketch.onrender.com/api
+        value: /api
 
 # ==============================================================================
 # Managed PostgreSQL Database

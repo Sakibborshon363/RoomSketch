@@ -9,7 +9,6 @@ const nextConfig = {
     const rawTarget =
       process.env.INTERNAL_BACKEND_URL ||
       process.env.BACKEND_URL ||
-      process.env.NEXT_PUBLIC_API_URL ||
       "https://roomsketch-backend.onrender.com";
     const cleanTarget = rawTarget.replace(/\/api\/?$/, "");
     return [
