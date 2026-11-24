@@ -15,6 +15,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { ShortcutsModal } from "@/components/editor/ShortcutsModal";
 import { BoQModal } from "@/components/editor/BoQModal";
+import { AiAdvisorModal } from "@/components/editor/AiAdvisorModal";
 import { Loader2, Download, Share2, Copy, Check, ExternalLink, ShieldAlert, Sparkles } from "lucide-react";
 import { api } from "@/lib/api";
 import { exportToHighResPng, exportToArchitecturalPdf } from "@/lib/exportEngine";
@@ -76,6 +77,12 @@ export default function EditorPage() {
   const [isShareActive, setIsShareActive] = useState(true);
   const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
   const [boqModalOpen, setBoqModalOpen] = useState(false);
+  const [aiAdvisorModalOpen, setAiAdvisorModalOpen] = useState(false);
+
+  const handleApplyAutoFurnish = (items: any[], roomName: string) => {
+    useEditorStore.getState().addBatchFurniture(items);
+    success("AI Auto-Furnish Applied", `Placed ${items.length} fixtures in "${roomName}".`);
+  };
 
   useEffect(() => {
     if (projectId) {
@@ -310,6 +317,7 @@ export default function EditorPage() {
           onShare={handleOpenShare}
           onOpenShortcuts={() => setShortcutsModalOpen(true)}
           onOpenBoQ={() => setBoqModalOpen(true)}
+          onOpenAiAdvisor={() => setAiAdvisorModalOpen(true)}
         />
 
         {/* Center Workspace Layout */}
@@ -443,6 +451,18 @@ export default function EditorPage() {
           doorsWindows={doorsWindows}
           furniture={furniture}
           unit={unit}
+        />
+
+        {/* AI Architectural Ergonomics & Auto-Furnish Modal */}
+        <AiAdvisorModal
+          isOpen={aiAdvisorModalOpen}
+          onClose={() => setAiAdvisorModalOpen(false)}
+          projectName={projectName}
+          floorName={floorName}
+          rooms={rooms}
+          doorsWindows={doorsWindows}
+          furniture={furniture}
+          onApplyAutoFurnish={handleApplyAutoFurnish}
         />
       </div>
     </AuthGuard>

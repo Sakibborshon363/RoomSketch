@@ -74,6 +74,7 @@ interface EditorState {
 
   // Furniture operations (Phase 4)
   addFurniture: (item: Partial<FurnitureItem>) => void;
+  addBatchFurniture: (items: FurnitureItem[]) => void;
   updateFurniture: (id: string, updates: Partial<FurnitureItem>) => void;
   deleteFurniture: (id: string) => void;
   duplicateFurniture: (id: string) => void;
@@ -570,6 +571,17 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       furniture: [...state.furniture, newFurniture],
       selectedId: id,
       selectedType: "furniture",
+      saveStatus: "unsaved",
+    }));
+
+    scheduleAutosave(() => get().saveCurrentLayout(), 1200);
+  },
+
+  addBatchFurniture: (items) => {
+    if (!items || items.length === 0) return;
+    get().pushHistory();
+    set((state) => ({
+      furniture: [...state.furniture, ...items],
       saveStatus: "unsaved",
     }));
 
