@@ -76,8 +76,13 @@ export default function LoginPage() {
         router.push("/dashboard");
       }
     } catch (err: unknown) {
-      const axiosError = err as { response?: { data?: { message?: string } } };
-      const msg = axiosError.response?.data?.message || "Invalid email or password. Please try again.";
+      const axiosError = err as { response?: { status?: number; data?: { message?: string } } };
+      let msg = "Invalid email or password. Please try again.";
+      if (axiosError.response?.status === 502 || axiosError.response?.status === 503) {
+        msg = "The cloud server is currently waking up from standby sleep. Please click again in a few seconds.";
+      } else if (axiosError.response?.data?.message) {
+        msg = axiosError.response.data.message;
+      }
       setErrorMessage(msg);
       toastError("Authentication failed", msg);
     } finally {
