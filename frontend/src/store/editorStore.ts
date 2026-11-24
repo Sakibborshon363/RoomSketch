@@ -15,6 +15,10 @@ interface EditorState {
   snapToGrid: boolean;
   showFurniture: boolean;
   showRoomLabels: boolean;
+  showElectrical: boolean;
+  showPlumbing: boolean;
+  showLighting: boolean;
+  showHvac: boolean;
   activeTool: "select" | "draw_room" | "wall" | "door" | "window" | "measure" | "pan";
   zoom: number;
   stagePos: { x: number; y: number };
@@ -41,6 +45,10 @@ interface EditorState {
   setSnapToGrid: (snap: boolean) => void;
   setShowFurniture: (show: boolean) => void;
   setShowRoomLabels: (show: boolean) => void;
+  setShowElectrical: (show: boolean) => void;
+  setShowPlumbing: (show: boolean) => void;
+  setShowLighting: (show: boolean) => void;
+  setShowHvac: (show: boolean) => void;
   setUnit: (unit: UnitSystem) => void;
   setSelection: (id: string | null, type?: EditorState["selectedType"]) => void;
 
@@ -120,6 +128,10 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   snapToGrid: true,
   showFurniture: true,
   showRoomLabels: true,
+  showElectrical: true,
+  showPlumbing: true,
+  showLighting: true,
+  showHvac: true,
   activeTool: "select",
   zoom: 1,
   stagePos: { x: 0, y: 0 },
@@ -142,6 +154,10 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   setSnapToGrid: (snapToGrid) => set({ snapToGrid }),
   setShowFurniture: (showFurniture) => set({ showFurniture }),
   setShowRoomLabels: (showRoomLabels) => set({ showRoomLabels }),
+  setShowElectrical: (showElectrical) => set({ showElectrical }),
+  setShowPlumbing: (showPlumbing) => set({ showPlumbing }),
+  setShowLighting: (showLighting) => set({ showLighting }),
+  setShowHvac: (showHvac) => set({ showHvac }),
   setUnit: (unit) => set({ unit }),
   setSelection: (selectedId, selectedType = null) => set({ selectedId, selectedType }),
 

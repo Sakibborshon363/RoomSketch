@@ -784,6 +784,173 @@ export default function FurnitureShape({
         );
       }
 
+      // ==========================================
+      // ELECTRICAL ENGINEERING SYMBOLS
+      // ==========================================
+      case "power_socket_duplex": {
+        const r = Math.min(width, height) / 2.2;
+        return (
+          <Group>
+            {/* Architectural duplex socket symbol: circle with 2 prongs */}
+            <Circle x={cx} y={cy} radius={r} fill="#EFF6FF" stroke="#2563EB" strokeWidth={1.8} />
+            <Line points={[cx - r + 3, cy - 3, cx + r - 3, cy - 3]} stroke="#1D4ED8" strokeWidth={1.5} />
+            <Line points={[cx - r + 3, cy + 3, cx + r - 3, cy + 3]} stroke="#1D4ED8" strokeWidth={1.5} />
+          </Group>
+        );
+      }
+
+      case "light_switch_single": {
+        const r = Math.min(width, height) / 2.2;
+        return (
+          <Group>
+            {/* Standard CAD switch symbol: circle with angled rocker arm */}
+            <Circle x={cx} y={cy} radius={r} fill="#EFF6FF" stroke="#1D4ED8" strokeWidth={1.8} />
+            <Line points={[cx, cy, cx + r + 3, cy - r - 2]} stroke="#1D4ED8" strokeWidth={2} />
+            <Text x={cx - 3} y={cy - 5} text="S" fontSize={8} fill="#1D4ED8" fontStyle="bold" />
+          </Group>
+        );
+      }
+
+      case "main_distribution_board": {
+        return (
+          <Group>
+            {/* MDB Breaker Box */}
+            <Rect x={0} y={0} width={width} height={height} fill="#1E293B" stroke="#0F172A" strokeWidth={2} cornerRadius={2} />
+            <Line points={[0, 0, width, height]} stroke="#64748B" strokeWidth={1} />
+            <Line points={[0, height, width, 0]} stroke="#64748B" strokeWidth={1} />
+            <Rect x={cx - 7} y={cy - 5} width={14} height={10} fill="#F8FAFC" />
+            <Text x={cx - 6} y={cy - 4} text="MDB" fontSize={6} fill="#0F172A" fontStyle="bold" />
+          </Group>
+        );
+      }
+
+      case "data_rj45_socket": {
+        const r = Math.min(width, height) / 2.2;
+        return (
+          <Group>
+            <Circle x={cx} y={cy} radius={r} fill="#F0F9FF" stroke="#0284C7" strokeWidth={1.5} />
+            <Rect x={cx - 4} y={cy - 4} width={8} height={8} fill="#0284C7" cornerRadius={1} />
+            <Text x={cx - 3} y={cy + r + 2} text="DATA" fontSize={6} fill="#0284C7" fontStyle="bold" align="center" />
+          </Group>
+        );
+      }
+
+      // ==========================================
+      // PLUMBING & SANITARY SYMBOLS
+      // ==========================================
+      case "water_inlet_tap": {
+        const r = Math.min(width, height) / 2.2;
+        return (
+          <Group>
+            <Circle x={cx} y={cy} radius={r} fill="#E0F2FE" stroke="#0284C7" strokeWidth={1.8} />
+            {/* Valve Cross */}
+            <Line points={[cx - 5, cy, cx + 5, cy]} stroke="#0284C7" strokeWidth={2} />
+            <Line points={[cx, cy - 5, cx, cy + 5]} stroke="#0284C7" strokeWidth={2} />
+          </Group>
+        );
+      }
+
+      case "waste_water_drain": {
+        const r = Math.min(width, height) / 2.2;
+        return (
+          <Group>
+            {/* Concentric drain strainer symbol */}
+            <Circle x={cx} y={cy} radius={r} fill="#ECFEFF" stroke="#0891B2" strokeWidth={1.8} />
+            <Circle x={cx} y={cy} radius={r * 0.55} fill="#CFFAFE" stroke="#0891B2" strokeWidth={1} strokeDasharray={[2, 2]} />
+            <Circle x={cx} y={cy} radius={2} fill="#0891B2" />
+          </Group>
+        );
+      }
+
+      case "gas_supply_valve": {
+        const r = Math.min(width, height) / 2.2;
+        return (
+          <Group>
+            <Circle x={cx} y={cy} radius={r} fill="#FEF3C7" stroke="#D97706" strokeWidth={1.8} />
+            <Text x={cx - 4} y={cy - 5} text="G" fontSize={9} fill="#D97706" fontStyle="bold" />
+          </Group>
+        );
+      }
+
+      // ==========================================
+      // LIGHTING PLAN SYMBOLS
+      // ==========================================
+      case "recessed_downlight": {
+        const r = Math.min(width, height) / 2.2;
+        return (
+          <Group>
+            <Circle x={cx} y={cy} radius={r} fill="#FFFBEB" stroke="#F59E0B" strokeWidth={1.5} strokeDasharray={[3, 2]} />
+            <Line points={[cx - r + 3, cy, cx + r - 3, cy]} stroke="#D97706" strokeWidth={1.2} />
+            <Line points={[cx, cy - r + 3, cx, cy + r - 3]} stroke="#D97706" strokeWidth={1.2} />
+            <Circle x={cx} y={cy} radius={2.5} fill="#D97706" />
+          </Group>
+        );
+      }
+
+      case "pendant_chandelier": {
+        const r = Math.min(width, height) / 2.2;
+        return (
+          <Group>
+            <Circle x={cx} y={cy} radius={r} fill="#FEF3C7" stroke="#D97706" strokeWidth={1.8} />
+            <Circle x={cx} y={cy} radius={r * 0.5} fill="#FDE68A" stroke="#B45309" strokeWidth={1} />
+            {/* Radial Rays */}
+            <Line points={[cx, cy - r, cx, cy - r * 0.5]} stroke="#B45309" strokeWidth={1.5} />
+            <Line points={[cx, cy + r, cx, cy + r * 0.5]} stroke="#B45309" strokeWidth={1.5} />
+            <Line points={[cx - r, cy, cx - r * 0.5, cy]} stroke="#B45309" strokeWidth={1.5} />
+            <Line points={[cx + r, cy, cx + r * 0.5, cy]} stroke="#B45309" strokeWidth={1.5} />
+          </Group>
+        );
+      }
+
+      case "led_strip_cove": {
+        return (
+          <Group>
+            <Rect x={0} y={0} width={width} height={height} fill="#FEF3C7" stroke="#F59E0B" strokeWidth={1.5} cornerRadius={2} />
+            <Line points={[cx, 2, cx, height - 2]} stroke="#D97706" strokeWidth={1.5} strokeDasharray={[4, 3]} />
+          </Group>
+        );
+      }
+
+      // ==========================================
+      // HVAC & CLIMATE SYMBOLS
+      // ==========================================
+      case "ac_indoor_split": {
+        return (
+          <Group>
+            {/* Indoor AC Unit Rect with cooling louvers */}
+            <Rect x={0} y={0} width={width} height={height} fill="#FFFFFF" stroke="#0284C7" strokeWidth={1.8} cornerRadius={3} />
+            <Line points={[3, height * 0.75, width - 3, height * 0.75]} stroke="#0284C7" strokeWidth={1.5} />
+            <Line points={[3, height * 0.85, width - 3, height * 0.85]} stroke="#38BDF8" strokeWidth={1} />
+            {/* Status LED & Badge */}
+            <Circle x={width - 5} y={5} radius={1.8} fill="#10B981" />
+            <Text x={4} y={cy - 4} text="A/C" fontSize={8} fill="#0284C7" fontStyle="bold" />
+          </Group>
+        );
+      }
+
+      case "ventilation_exhaust": {
+        const r = Math.min(width, height) / 2.2;
+        return (
+          <Group>
+            <Rect x={0} y={0} width={width} height={height} fill="#F8FAFC" stroke="#64748B" strokeWidth={1.5} cornerRadius={2} />
+            <Circle x={cx} y={cy} radius={r * 0.75} fill="#E2E8F0" stroke="#475569" strokeWidth={1} />
+            <Line points={[cx - r * 0.5, cy - r * 0.5, cx + r * 0.5, cy + r * 0.5]} stroke="#475569" strokeWidth={1.5} />
+            <Line points={[cx - r * 0.5, cy + r * 0.5, cx + r * 0.5, cy - r * 0.5]} stroke="#475569" strokeWidth={1.5} />
+          </Group>
+        );
+      }
+
+      case "air_diffuser_grille": {
+        return (
+          <Group>
+            <Rect x={0} y={0} width={width} height={height} fill="#F8FAFC" stroke="#64748B" strokeWidth={1.5} />
+            <Line points={[0, 0, width, height]} stroke="#94A3B8" strokeWidth={1} />
+            <Line points={[0, height, width, 0]} stroke="#94A3B8" strokeWidth={1} />
+            <Rect x={width * 0.25} y={height * 0.25} width={width * 0.5} height={height * 0.5} fill="#E2E8F0" stroke="#64748B" strokeWidth={1} />
+          </Group>
+        );
+      }
+
       // DEFAULT FALLBACK (Clean generic architectural furniture rect)
       default: {
         return (

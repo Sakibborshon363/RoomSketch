@@ -25,6 +25,10 @@ export default function EditorCanvas() {
     snapToGrid,
     showFurniture,
     showRoomLabels,
+    showElectrical,
+    showPlumbing,
+    showLighting,
+    showHvac,
     unit,
     setZoom,
     setStagePos,
@@ -612,12 +616,27 @@ export default function EditorCanvas() {
             />
           ))}
 
-          {/* Furniture Layer (sorted by zIndex: rugs below, tables/sofas middle, lamps/decor top) */}
-          {(showFurniture ?? true) &&
-            [...furniture]
-              .filter((f) => f.isVisible !== false)
-              .sort((a, b) => (a.zIndex || 1) - (b.zIndex || 1))
-              .map((item) => (
+          {/* Furniture & Engineering Systems Layers */}
+          {[...furniture]
+            .filter((f) => {
+              if (f.isVisible === false) return false;
+              if (f.category === "ELECTRICAL" && showElectrical === false) return false;
+              if (f.category === "PLUMBING" && showPlumbing === false) return false;
+              if (f.category === "LIGHTING" && showLighting === false) return false;
+              if (f.category === "HVAC" && showHvac === false) return false;
+              if (
+                f.category !== "ELECTRICAL" &&
+                f.category !== "PLUMBING" &&
+                f.category !== "LIGHTING" &&
+                f.category !== "HVAC" &&
+                showFurniture === false
+              ) {
+                return false;
+              }
+              return true;
+            })
+            .sort((a, b) => (a.zIndex || 1) - (b.zIndex || 1))
+            .map((item) => (
                 <FurnitureShape
                   key={item.id}
                   item={item}

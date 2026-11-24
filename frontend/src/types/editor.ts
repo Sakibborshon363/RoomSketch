@@ -21,7 +21,11 @@ export type FurnitureCategory =
   | "OFFICE"
   | "DINING_ROOM"
   | "STORAGE"
-  | "DECORATION";
+  | "DECORATION"
+  | "ELECTRICAL"
+  | "PLUMBING"
+  | "LIGHTING"
+  | "HVAC";
 
 export interface FurnitureItem {
   id: string;

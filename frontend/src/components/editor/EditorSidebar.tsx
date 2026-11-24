@@ -27,6 +27,10 @@ import {
   Grid,
   Ruler,
   Magnet,
+  Zap,
+  Droplets,
+  Lightbulb,
+  Fan,
 } from "lucide-react";
 
 export function EditorSidebar() {
@@ -68,6 +72,14 @@ export function EditorSidebar() {
     setShowFurniture,
     showRoomLabels,
     setShowRoomLabels,
+    showElectrical,
+    setShowElectrical,
+    showPlumbing,
+    setShowPlumbing,
+    showLighting,
+    setShowLighting,
+    showHvac,
+    setShowHvac,
     rooms,
     furniture,
     doorsWindows,
@@ -92,6 +104,10 @@ export function EditorSidebar() {
     { id: "OFFICE", label: "Office" },
     { id: "STORAGE", label: "Storage" },
     { id: "DECOR", label: "Decor" },
+    { id: "ELECTRICAL", label: "⚡ Electrical" },
+    { id: "PLUMBING", label: "🚰 Plumbing" },
+    { id: "LIGHTING", label: "💡 Lighting" },
+    { id: "HVAC", label: "❄️ HVAC" },
   ];
 
   const filteredFurniture = FURNITURE_CATALOG.filter((item) => {
@@ -104,7 +120,11 @@ export function EditorSidebar() {
       (furnitureCategory === "DINING" && item.category === "DINING_ROOM") ||
       (furnitureCategory === "OFFICE" && item.category === "OFFICE") ||
       (furnitureCategory === "STORAGE" && item.category === "STORAGE") ||
-      (furnitureCategory === "DECOR" && item.category === "DECORATION");
+      (furnitureCategory === "DECOR" && item.category === "DECORATION") ||
+      (furnitureCategory === "ELECTRICAL" && item.category === "ELECTRICAL") ||
+      (furnitureCategory === "PLUMBING" && item.category === "PLUMBING") ||
+      (furnitureCategory === "LIGHTING" && item.category === "LIGHTING") ||
+      (furnitureCategory === "HVAC" && item.category === "HVAC");
 
     const matchesSearch =
       searchQuery.trim() === "" ||
@@ -198,6 +218,45 @@ export function EditorSidebar() {
         return (
           <svg className="w-10 h-8" viewBox="0 0 50 40" fill="none">
             <rect x="4" y="4" width="42" height="32" rx="2" fill={color} stroke="#78716C" strokeWidth="1.5" strokeDasharray="3 2" />
+          </svg>
+        );
+      case "power_socket_duplex":
+      case "light_switch_single":
+      case "data_rj45_socket":
+        return (
+          <svg className="w-8 h-8" viewBox="0 0 40 40" fill="none">
+            <circle cx="20" cy="20" r="14" fill="#EFF6FF" stroke="#2563EB" strokeWidth="2" />
+            <line x1="14" y1="17" x2="26" y2="17" stroke="#1D4ED8" strokeWidth="2" />
+            <line x1="14" y1="23" x2="26" y2="23" stroke="#1D4ED8" strokeWidth="2" />
+          </svg>
+        );
+      case "water_inlet_tap":
+      case "waste_water_drain":
+      case "gas_supply_valve":
+        return (
+          <svg className="w-8 h-8" viewBox="0 0 40 40" fill="none">
+            <circle cx="20" cy="20" r="14" fill="#E0F2FE" stroke="#0284C7" strokeWidth="2" />
+            <line x1="12" y1="20" x2="28" y2="20" stroke="#0284C7" strokeWidth="2" />
+            <line x1="20" y1="12" x2="20" y2="28" stroke="#0284C7" strokeWidth="2" />
+          </svg>
+        );
+      case "recessed_downlight":
+      case "pendant_chandelier":
+      case "led_strip_cove":
+        return (
+          <svg className="w-8 h-8" viewBox="0 0 40 40" fill="none">
+            <circle cx="20" cy="20" r="13" fill="#FFFBEB" stroke="#F59E0B" strokeWidth="2" strokeDasharray="3 2" />
+            <circle cx="20" cy="20" r="4" fill="#D97706" />
+          </svg>
+        );
+      case "ac_indoor_split":
+      case "ventilation_exhaust":
+      case "air_diffuser_grille":
+        return (
+          <svg className="w-10 h-6" viewBox="0 0 50 30" fill="none">
+            <rect x="2" y="2" width="46" height="26" rx="3" fill="#FFFFFF" stroke="#0284C7" strokeWidth="2" />
+            <line x1="6" y1="20" x2="44" y2="20" stroke="#0284C7" strokeWidth="1.5" />
+            <circle x="42" y="6" r="1.5" fill="#10B981" />
           </svg>
         );
       default:
@@ -1013,6 +1072,66 @@ export function EditorSidebar() {
                         title={showRoomLabels ? "Hide labels" : "Show labels"}
                       >
                         {showRoomLabels ? <Eye className="h-3.5 w-3.5 text-[#1E3A34]" /> : <EyeOff className="h-3.5 w-3.5 text-stone-400" />}
+                      </button>
+                    </div>
+
+                    {/* Electrical Layer Toggle */}
+                    <div className="flex items-center justify-between rounded-xl bg-white p-2 border border-stone-200/60">
+                      <div className="flex items-center gap-2 text-xs font-bold text-stone-800">
+                        <Zap className="h-3.5 w-3.5 text-blue-600" />
+                        <span>Electrical Layer (Sockets, MDB)</span>
+                      </div>
+                      <button
+                        onClick={() => setShowElectrical(!showElectrical)}
+                        className="rounded-lg p-1 text-stone-500 hover:bg-stone-100 transition-colors"
+                        title={showElectrical ? "Hide electrical layer" : "Show electrical layer"}
+                      >
+                        {showElectrical ? <Eye className="h-3.5 w-3.5 text-[#1E3A34]" /> : <EyeOff className="h-3.5 w-3.5 text-stone-400" />}
+                      </button>
+                    </div>
+
+                    {/* Plumbing Layer Toggle */}
+                    <div className="flex items-center justify-between rounded-xl bg-white p-2 border border-stone-200/60">
+                      <div className="flex items-center gap-2 text-xs font-bold text-stone-800">
+                        <Droplets className="h-3.5 w-3.5 text-cyan-600" />
+                        <span>Plumbing Layer (Water, Drains)</span>
+                      </div>
+                      <button
+                        onClick={() => setShowPlumbing(!showPlumbing)}
+                        className="rounded-lg p-1 text-stone-500 hover:bg-stone-100 transition-colors"
+                        title={showPlumbing ? "Hide plumbing layer" : "Show plumbing layer"}
+                      >
+                        {showPlumbing ? <Eye className="h-3.5 w-3.5 text-[#1E3A34]" /> : <EyeOff className="h-3.5 w-3.5 text-stone-400" />}
+                      </button>
+                    </div>
+
+                    {/* Lighting Layer Toggle */}
+                    <div className="flex items-center justify-between rounded-xl bg-white p-2 border border-stone-200/60">
+                      <div className="flex items-center gap-2 text-xs font-bold text-stone-800">
+                        <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
+                        <span>Lighting Plan Layer</span>
+                      </div>
+                      <button
+                        onClick={() => setShowLighting(!showLighting)}
+                        className="rounded-lg p-1 text-stone-500 hover:bg-stone-100 transition-colors"
+                        title={showLighting ? "Hide lighting layer" : "Show lighting layer"}
+                      >
+                        {showLighting ? <Eye className="h-3.5 w-3.5 text-[#1E3A34]" /> : <EyeOff className="h-3.5 w-3.5 text-stone-400" />}
+                      </button>
+                    </div>
+
+                    {/* HVAC Layer Toggle */}
+                    <div className="flex items-center justify-between rounded-xl bg-white p-2 border border-stone-200/60">
+                      <div className="flex items-center gap-2 text-xs font-bold text-stone-800">
+                        <Fan className="h-3.5 w-3.5 text-sky-600" />
+                        <span>HVAC Climate Layer (A/C, Fans)</span>
+                      </div>
+                      <button
+                        onClick={() => setShowHvac(!showHvac)}
+                        className="rounded-lg p-1 text-stone-500 hover:bg-stone-100 transition-colors"
+                        title={showHvac ? "Hide HVAC layer" : "Show HVAC layer"}
+                      >
+                        {showHvac ? <Eye className="h-3.5 w-3.5 text-[#1E3A34]" /> : <EyeOff className="h-3.5 w-3.5 text-stone-400" />}
                       </button>
                     </div>
                   </div>
