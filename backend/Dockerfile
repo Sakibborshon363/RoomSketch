@@ -8,7 +8,7 @@ RUN mvn dependency:go-offline -B || true
 
 # Copy source code and build jar
 COPY src ./src
-RUN mvn clean package -DskipTests
+RUN mvn clean package -Dmaven.test.skip=true
 
 # Stage 2: Minimal Java 21 JRE runtime image
 FROM eclipse-temurin:21-jre-alpine

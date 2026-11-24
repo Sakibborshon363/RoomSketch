@@ -2,6 +2,7 @@ package com.roomsketch;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.roomsketch.dto.CreateProjectRequest;
+import com.roomsketch.dto.DashboardStatsResponse;
 import com.roomsketch.dto.ProjectDetailResponse;
 import com.roomsketch.dto.ProjectResponse;
 import com.roomsketch.dto.UpdateProjectRequest;
