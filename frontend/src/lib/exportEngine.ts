@@ -245,7 +245,13 @@ export async function exportToArchitecturalPdf({
     doc.setDrawColor(220, 218, 215);
     doc.rect(drawingBoxX, drawingBoxY, drawingBoxW, drawingBoxH, "S");
 
-    doc.addImage(imgDataUrl, "PNG", drawingBoxX + 2, drawingBoxY + 2, drawingBoxW - 4, drawingBoxH - 4, undefined, "FAST");
+    if (imgDataUrl && imgDataUrl.startsWith("data:image/")) {
+      try {
+        doc.addImage(imgDataUrl, "PNG", drawingBoxX + 2, drawingBoxY + 2, drawingBoxW - 4, drawingBoxH - 4, undefined, "FAST");
+      } catch (e) {
+        console.warn("Could not embed canvas bitmap into PDF", e);
+      }
+    }
 
     // 4. Architectural Room Schedule Table (Right 35% of Sheet)
     const tableX = drawingBoxX + drawingBoxW + 8;

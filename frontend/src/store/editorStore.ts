@@ -88,6 +88,7 @@ interface EditorState {
 }
 
 let autosaveTimeoutId: ReturnType<typeof setTimeout> | null = null;
+let activeSavePromise: Promise<void> | null = null;
 
 export const scheduleAutosave = (saveFn: () => Promise<void>, delayMs: number = 1200) => {
   if (autosaveTimeoutId) {
@@ -225,19 +226,28 @@ export const useEditorStore = create<EditorState>((set, get) => ({
       doorsWindows,
     };
 
-    try {
-      await api.put(`/floors/${floorId}/layout`, {
-        layoutData: JSON.stringify(layoutData),
-      });
-      set({ saveStatus: "saved", lastSavedAt: new Date() });
-    } catch (err) {
-      console.error("Failed to auto-save layout", err);
-      set({ saveStatus: "unsaved" });
-    }
+    activeSavePromise = (async () => {
+      try {
+        await api.put(`/floors/${floorId}/layout`, {
+          layoutData: JSON.stringify(layoutData),
+        });
+        set({ saveStatus: "saved", lastSavedAt: new Date() });
+      } catch (err) {
+        console.error("Failed to auto-save layout", err);
+        set({ saveStatus: "unsaved" });
+      } finally {
+        activeSavePromise = null;
+      }
+    })();
+
+    await activeSavePromise;
   },
 
   flushAutosaveNow: async () => {
     cancelPendingAutosave();
+    if (activeSavePromise) {
+      await activeSavePromise;
+    }
     if (get().saveStatus === "unsaved") {
       await get().saveCurrentLayout();
     }
