@@ -1,6 +1,6 @@
 services:
   # ============================================================================
-  # RoomSketch Backend Web Service (Spring Boot 3 + Java 21)
+  # RoomSketch Backend Service (Spring Boot 3 + Java 21)
   # ============================================================================
   - type: web
     name: roomsketch-backend
@@ -23,10 +23,11 @@ services:
         value: https://*.onrender.com,http://localhost:3000
 
   # ============================================================================
-  # RoomSketch Frontend Web Service (Next.js 14 App Router)
+  # RoomSketch Main Web Application (Next.js 14 App Router)
+  # Public Domain: https://roomsketch.onrender.com
   # ============================================================================
   - type: web
-    name: roomsketch-frontend
+    name: roomsketch
     runtime: node
     rootDir: frontend
     plan: free
@@ -36,8 +37,10 @@ services:
     envVars:
       - key: NODE_VERSION
         value: 20
+      - key: BACKEND_URL
+        value: https://roomsketch-backend.onrender.com
       - key: NEXT_PUBLIC_API_URL
-        value: https://roomsketch-backend.onrender.com/api
+        value: https://roomsketch.onrender.com/api
 
 # ==============================================================================
 # Managed PostgreSQL Database
