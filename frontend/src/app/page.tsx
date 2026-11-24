@@ -112,8 +112,8 @@ export default function LandingPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-3xl text-center">
             <div className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50/80 px-3.5 py-1 text-xs font-semibold text-brand-700 shadow-sm mb-6">
-              <Sparkles className="h-3.5 w-3.5" />
-              University Capstone Project: Professional 2D CAD Planning
+              <Sparkles className="h-3.5 w-3.5 text-brand-600" />
+              Professional 2D CAD &amp; Architectural Planning Platform
             </div>
             <h1 className="text-4xl font-extrabold tracking-tight text-slate-950 sm:text-6xl sm:leading-[1.15]">
               Design Real Floor Plans with Interactive Precision
@@ -231,9 +231,9 @@ export default function LandingPage() {
           <div className="flex items-center gap-2">
             <Compass className="h-5 w-5 text-brand-600" />
             <span className="font-bold text-slate-900">RoomSketch</span>
-            <span className="text-slate-400">| Final Year Software Engineering Capstone</span>
+            <span className="text-slate-400">| Professional 2D Architectural CAD Platform</span>
           </div>
-          <p>© {new Date().getFullYear()} RoomSketch. Traditional Software Engineering Architecture.</p>
+          <p>© {new Date().getFullYear()} RoomSketch. All rights reserved.</p>
         </div>
       </footer>
     </div>

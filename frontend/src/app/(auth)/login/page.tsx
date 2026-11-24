@@ -124,7 +124,7 @@ export default function LoginPage() {
 
           {/* Instant 1-Click Demo Login Banner */}
           <div className="mb-5 rounded-xl border border-brand-200 bg-brand-50/70 p-3 text-center">
-            <p className="text-xs font-semibold text-brand-900 mb-2">University Examiner / Evaluation Mode</p>
+            <p className="text-xs font-semibold text-brand-900 mb-2">Quick Evaluation / Demo Mode</p>
             <Button
               type="button"
               onClick={handleInstantDemoLogin}
