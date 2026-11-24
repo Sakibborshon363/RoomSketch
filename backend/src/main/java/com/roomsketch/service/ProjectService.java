@@ -16,7 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -53,7 +55,18 @@ public class ProjectService {
                     .collect(Collectors.toList());
         }
 
-        return projects.stream().map(this::mapToProjectResponse).collect(Collectors.toList());
+        if (projects.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<UUID> projectIds = projects.stream().map(Project::getId).collect(Collectors.toList());
+        List<Floor> allFloors = floorRepository.findByProjectIdInOrderByFloorNumberAsc(projectIds);
+        Map<UUID, List<Floor>> floorsByProject = allFloors.stream()
+                .collect(Collectors.groupingBy(f -> f.getProject().getId()));
+
+        return projects.stream()
+                .map(p -> mapToProjectResponse(p, floorsByProject.getOrDefault(p.getId(), Collections.emptyList())))
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -176,30 +189,37 @@ public class ProjectService {
     public DashboardStatsResponse getDashboardStats(UUID userId) {
         List<Project> projects = projectRepository.findByUserId(userId, Sort.by(Sort.Direction.DESC, "updatedAt"));
         long totalProjects = projects.size();
-        long totalFloors = 0;
+        if (totalProjects == 0) {
+            return DashboardStatsResponse.builder()
+                    .totalProjects(0)
+                    .totalFloors(0)
+                    .totalRooms(0)
+                    .totalArea(0.0)
+                    .build();
+        }
+
+        List<UUID> projectIds = projects.stream().map(Project::getId).collect(Collectors.toList());
+        List<Floor> allFloors = floorRepository.findByProjectIdInOrderByFloorNumberAsc(projectIds);
+        long totalFloors = allFloors.size();
         long totalRooms = 0;
         double totalArea = 0.0;
 
-        for (Project project : projects) {
-            List<Floor> floors = floorRepository.findByProjectIdOrderByFloorNumberAsc(project.getId());
-            totalFloors += floors.size();
-            for (Floor floor : floors) {
-                if (floor.getLayoutData() != null) {
-                    try {
-                        JsonNode root = objectMapper.readTree(floor.getLayoutData());
-                        JsonNode roomsNode = root.get("rooms");
-                        if (roomsNode != null && roomsNode.isArray()) {
-                            totalRooms += roomsNode.size();
-                            for (JsonNode room : roomsNode) {
-                                double width = room.path("width").asDouble(0);
-                                double height = room.path("height").asDouble(0);
-                                // Layout coordinates: 100 canvas units = approx 4 meters (scale factor 0.04)
-                                double roomArea = (width * 0.04) * (height * 0.04);
-                                totalArea += roomArea;
-                            }
+        for (Floor floor : allFloors) {
+            if (floor.getLayoutData() != null) {
+                try {
+                    JsonNode root = objectMapper.readTree(floor.getLayoutData());
+                    JsonNode roomsNode = root.get("rooms");
+                    if (roomsNode != null && roomsNode.isArray()) {
+                        totalRooms += roomsNode.size();
+                        for (JsonNode room : roomsNode) {
+                            double width = room.path("width").asDouble(0);
+                            double height = room.path("height").asDouble(0);
+                            // Layout coordinates: 100 canvas units = approx 4 meters (scale factor 0.04)
+                            double roomArea = (width * 0.04) * (height * 0.04);
+                            totalArea += roomArea;
                         }
-                    } catch (Exception ignored) {
                     }
+                } catch (Exception ignored) {
                 }
             }
         }
@@ -214,6 +234,10 @@ public class ProjectService {
 
     private ProjectResponse mapToProjectResponse(Project project) {
         List<Floor> floors = floorRepository.findByProjectIdOrderByFloorNumberAsc(project.getId());
+        return mapToProjectResponse(project, floors);
+    }
+
+    private ProjectResponse mapToProjectResponse(Project project, List<Floor> floors) {
         int floorCount = floors.size();
         int roomCount = 0;
         double totalArea = 0.0;

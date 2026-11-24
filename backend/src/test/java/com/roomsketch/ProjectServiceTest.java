@@ -28,6 +28,7 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -105,7 +106,7 @@ class ProjectServiceTest {
     void shouldGetAllProjectsForUserWithSearch() {
         when(projectRepository.findByUserId(eq(userId), any(Sort.class)))
                 .thenReturn(List.of(project));
-        when(floorRepository.findByProjectIdOrderByFloorNumberAsc(projectId))
+        when(floorRepository.findByProjectIdInOrderByFloorNumberAsc(anyList()))
                 .thenReturn(Collections.emptyList());
 
         List<ProjectResponse> all = projectService.getAllProjects(userId, "updatedAt_desc", "garden");
@@ -114,6 +115,20 @@ class ProjectServiceTest {
 
         List<ProjectResponse> none = projectService.getAllProjects(userId, "updatedAt_desc", "nonexistent");
         assertEquals(0, none.size());
+    }
+
+    @Test
+    void shouldGetDashboardStats() {
+        when(projectRepository.findByUserId(eq(userId), any(Sort.class)))
+                .thenReturn(List.of(project));
+        when(floorRepository.findByProjectIdInOrderByFloorNumberAsc(anyList()))
+                .thenReturn(Collections.emptyList());
+
+        DashboardStatsResponse stats = projectService.getDashboardStats(userId);
+        assertNotNull(stats);
+        assertEquals(1, stats.getTotalProjects());
+        assertEquals(0, stats.getTotalFloors());
+        assertEquals(0, stats.getTotalRooms());
     }
 
     @Test

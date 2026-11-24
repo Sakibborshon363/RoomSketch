@@ -11,5 +11,6 @@ import java.util.UUID;
 @Repository
 public interface FloorRepository extends JpaRepository<Floor, UUID> {
     List<Floor> findByProjectIdOrderByFloorNumberAsc(UUID projectId);
+    List<Floor> findByProjectIdInOrderByFloorNumberAsc(List<UUID> projectIds);
     Optional<Floor> findByIdAndProjectId(UUID id, UUID projectId);
 }
