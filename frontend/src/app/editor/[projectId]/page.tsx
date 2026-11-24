@@ -35,6 +35,22 @@ const EditorCanvas = dynamic(
   }
 );
 
+// Dynamically import ThreeSceneViewer with SSR disabled
+const ThreeSceneViewer = dynamic(
+  () => import("@/components/editor/ThreeSceneViewer"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full w-full items-center justify-center bg-[#F4F4F0]">
+        <div className="flex flex-col items-center gap-2 text-stone-500">
+          <Loader2 className="h-8 w-8 animate-spin text-[#1E3A34]" />
+          <p className="text-xs font-semibold">Initializing 3D Spatial Scene...</p>
+        </div>
+      </div>
+    ),
+  }
+);
+
 export default function EditorPage() {
   const params = useParams();
   const projectId = params?.projectId as string;
@@ -47,6 +63,7 @@ export default function EditorPage() {
     doorsWindows,
     furniture,
     unit,
+    viewMode,
     saveCurrentLayout,
   } = useEditorStore();
   const { success, error: toastError } = useToast();
@@ -300,13 +317,20 @@ export default function EditorPage() {
           {/* Left Tool Sidebar (Rail + Drawer) */}
           <EditorSidebar />
 
-          {/* Center Interactive 2D Canvas */}
+          {/* Center Interactive 2D Canvas or 3D Spatial Scene */}
           <main className="relative flex-1 h-full overflow-hidden">
-            {/* Floating Top Tool Palette */}
-            <FloatingToolPalette />
+            {viewMode === "2D" ? (
+              <>
+                {/* Floating Top Tool Palette */}
+                <FloatingToolPalette />
 
-            {/* Konva HTML5 2D Canvas */}
-            <EditorCanvas />
+                {/* Konva HTML5 2D Canvas */}
+                <EditorCanvas />
+              </>
+            ) : (
+              /* Three.js WebGL 3D Architectural Visualizer */
+              <ThreeSceneViewer />
+            )}
           </main>
 
           {/* Right Properties Panel / Plan Overview */}

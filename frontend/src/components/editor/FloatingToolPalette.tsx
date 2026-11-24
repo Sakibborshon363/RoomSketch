@@ -12,10 +12,11 @@ import {
   Hand,
   Undo2,
   Redo2,
+  Box,
 } from "lucide-react";
 
 export function FloatingToolPalette() {
-  const { activeTool, setActiveTool, undo, redo, history } = useEditorStore();
+  const { activeTool, setActiveTool, undo, redo, history, viewMode, setViewMode } = useEditorStore();
 
   const tools = [
     { id: "select", label: "Select (V)", icon: MousePointer2 },
@@ -77,6 +78,35 @@ export function FloatingToolPalette() {
       >
         <Redo2 className="h-4 w-4" />
       </button>
+
+      <div className="mx-1 h-5 w-px bg-stone-200" />
+
+      {/* 2D / 3D Mode Switcher Toggle */}
+      <div className="flex items-center rounded-xl bg-stone-100 p-0.5 text-xs font-bold">
+        <button
+          onClick={() => setViewMode("2D")}
+          className={`rounded-lg px-2.5 py-1 transition-all ${
+            viewMode === "2D"
+              ? "bg-[#1E3A34] text-white shadow-xs"
+              : "text-stone-600 hover:text-stone-900"
+          }`}
+          title="2D CAD Floor Plan View"
+        >
+          2D Plan
+        </button>
+        <button
+          onClick={() => setViewMode("3D_ISOMETRIC")}
+          className={`rounded-lg px-2.5 py-1 flex items-center gap-1 transition-all ${
+            viewMode !== "2D"
+              ? "bg-[#1E3A34] text-white shadow-xs"
+              : "text-stone-600 hover:text-stone-900"
+          }`}
+          title="3D Spatial WebGL Architectural Visualizer"
+        >
+          <Box className="h-3 w-3 text-amber-300" />
+          <span>3D View</span>
+        </button>
+      </div>
     </div>
   );
 }

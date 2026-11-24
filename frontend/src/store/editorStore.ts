@@ -19,6 +19,7 @@ interface EditorState {
   showPlumbing: boolean;
   showLighting: boolean;
   showHvac: boolean;
+  viewMode: "2D" | "3D_ISOMETRIC" | "3D_FIRST_PERSON";
   activeTool: "select" | "draw_room" | "wall" | "door" | "window" | "measure" | "pan";
   zoom: number;
   stagePos: { x: number; y: number };
@@ -49,6 +50,7 @@ interface EditorState {
   setShowPlumbing: (show: boolean) => void;
   setShowLighting: (show: boolean) => void;
   setShowHvac: (show: boolean) => void;
+  setViewMode: (mode: EditorState["viewMode"]) => void;
   setUnit: (unit: UnitSystem) => void;
   setSelection: (id: string | null, type?: EditorState["selectedType"]) => void;
 
@@ -132,6 +134,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   showPlumbing: true,
   showLighting: true,
   showHvac: true,
+  viewMode: "2D",
   activeTool: "select",
   zoom: 1,
   stagePos: { x: 0, y: 0 },
@@ -158,6 +161,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
   setShowPlumbing: (showPlumbing) => set({ showPlumbing }),
   setShowLighting: (showLighting) => set({ showLighting }),
   setShowHvac: (showHvac) => set({ showHvac }),
+  setViewMode: (viewMode) => set({ viewMode }),
   setUnit: (unit) => set({ unit }),
   setSelection: (selectedId, selectedType = null) => set({ selectedId, selectedType }),
 
