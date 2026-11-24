@@ -35,7 +35,7 @@ public class ShareService {
                 .orElse(null);
 
         if (sharedProject == null) {
-            String token = UUID.randomUUID().toString().replace("-", "").substring(0, 16);
+            String token = UUID.randomUUID().toString().replace("-", "");
             sharedProject = SharedProject.builder()
                     .project(project)
                     .shareToken(token)

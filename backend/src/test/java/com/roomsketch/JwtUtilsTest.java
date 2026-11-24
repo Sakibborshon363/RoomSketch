@@ -34,4 +34,17 @@ class JwtUtilsTest {
     void shouldRejectInvalidToken() {
         assertFalse(jwtUtils.validateJwtToken("invalid-token-value"));
     }
+
+    @Test
+    void shouldHandleShortSecretWithoutWeakKeyException() {
+        JwtUtils shortKeyJwt = new JwtUtils();
+        ReflectionTestUtils.setField(shortKeyJwt, "jwtSecret", "short");
+        ReflectionTestUtils.setField(shortKeyJwt, "jwtExpirationMs", 3600000L);
+
+        UUID userId = UUID.randomUUID();
+        String token = shortKeyJwt.generateTokenFromUsername("user@roomsketch.com", userId);
+        assertNotNull(token);
+        assertTrue(shortKeyJwt.validateJwtToken(token));
+        assertEquals("user@roomsketch.com", shortKeyJwt.getUserNameFromJwtToken(token));
+    }
 }

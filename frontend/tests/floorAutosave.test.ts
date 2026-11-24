@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
 import { useEditorStore, scheduleAutosave, cancelPendingAutosave } from "../src/store/editorStore";
-import { api } from "../src/lib/api";
+import { api } from "@/lib/api";
 
 // Mock the API module
-vi.mock("../src/lib/api", () => ({
+vi.mock("@/lib/api", () => ({
   api: {
     get: vi.fn(),
     post: vi.fn(),
