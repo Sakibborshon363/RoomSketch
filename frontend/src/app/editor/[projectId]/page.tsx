@@ -14,6 +14,7 @@ import { useToast } from "@/components/ui/Toast";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { ShortcutsModal } from "@/components/editor/ShortcutsModal";
+import { BoQModal } from "@/components/editor/BoQModal";
 import { Loader2, Download, Share2, Copy, Check, ExternalLink, ShieldAlert, Sparkles } from "lucide-react";
 import { api } from "@/lib/api";
 import { exportToHighResPng, exportToArchitecturalPdf } from "@/lib/exportEngine";
@@ -38,7 +39,16 @@ export default function EditorPage() {
   const params = useParams();
   const projectId = params?.projectId as string;
   const router = useRouter();
-  const { loadProjectAndFloor, projectName, saveCurrentLayout } = useEditorStore();
+  const {
+    loadProjectAndFloor,
+    projectName,
+    floorName,
+    rooms,
+    doorsWindows,
+    furniture,
+    unit,
+    saveCurrentLayout,
+  } = useEditorStore();
   const { success, error: toastError } = useToast();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -48,6 +58,7 @@ export default function EditorPage() {
   const [shareLoading, setShareLoading] = useState(false);
   const [isShareActive, setIsShareActive] = useState(true);
   const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
+  const [boqModalOpen, setBoqModalOpen] = useState(false);
 
   useEffect(() => {
     if (projectId) {
@@ -281,6 +292,7 @@ export default function EditorPage() {
           onExportPdf={handleExportPdf}
           onShare={handleOpenShare}
           onOpenShortcuts={() => setShortcutsModalOpen(true)}
+          onOpenBoQ={() => setBoqModalOpen(true)}
         />
 
         {/* Center Workspace Layout */}
@@ -395,6 +407,18 @@ export default function EditorPage() {
         <ShortcutsModal
           isOpen={shortcutsModalOpen}
           onClose={() => setShortcutsModalOpen(false)}
+        />
+
+        {/* Architectural Cost Estimator & BoQ Modal */}
+        <BoQModal
+          isOpen={boqModalOpen}
+          onClose={() => setBoqModalOpen(false)}
+          projectName={projectName}
+          floorName={floorName}
+          rooms={rooms}
+          doorsWindows={doorsWindows}
+          furniture={furniture}
+          unit={unit}
         />
       </div>
     </AuthGuard>

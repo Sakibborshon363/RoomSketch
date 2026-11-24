@@ -20,6 +20,7 @@ import {
   Layers,
   Sparkles,
   HelpCircle,
+  Calculator,
 } from "lucide-react";
 
 interface EditorToolbarProps {
@@ -27,6 +28,7 @@ interface EditorToolbarProps {
   onExportPdf: () => void;
   onShare: () => void;
   onOpenShortcuts?: () => void;
+  onOpenBoQ?: () => void;
 }
 
 export function EditorToolbar({
@@ -34,6 +36,7 @@ export function EditorToolbar({
   onExportPdf,
   onShare,
   onOpenShortcuts,
+  onOpenBoQ,
 }: EditorToolbarProps) {
   const {
     projectName,
@@ -246,6 +249,20 @@ export function EditorToolbar({
         )}
 
         <div className="h-4 w-px bg-stone-200 hidden sm:block" />
+
+        {/* Cost & BoQ Button */}
+        {onOpenBoQ && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onOpenBoQ}
+            className="text-xs font-bold gap-1.5 h-9 border-emerald-200 text-emerald-800 hover:bg-emerald-50 hover:border-emerald-300"
+            title="Bill of Quantities & Material Cost Estimator"
+          >
+            <Calculator className="h-3.5 w-3.5 text-emerald-600" />
+            <span className="hidden sm:inline">Cost / BoQ</span>
+          </Button>
+        )}
 
         {/* Share Button */}
         <Button variant="outline" size="sm" onClick={onShare} className="text-xs font-bold gap-1.5 h-9">
