@@ -15,7 +15,6 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { ShortcutsModal } from "@/components/editor/ShortcutsModal";
 import { Loader2, Download, Share2, Copy, Check, ExternalLink, ShieldAlert, Sparkles } from "lucide-react";
-import Konva from "konva";
 import { api } from "@/lib/api";
 import { exportToHighResPng, exportToArchitecturalPdf } from "@/lib/exportEngine";
 
@@ -177,7 +176,11 @@ export default function EditorPage() {
 
   const handleExportPng = async () => {
     const { projectName, floorName, unit, rooms, furniture, doorsWindows } = useEditorStore.getState();
-    const stage = Konva.stages[0] || null;
+    let stage: any = null;
+    if (typeof window !== "undefined") {
+      const KonvaModule = await import("konva");
+      stage = KonvaModule.default?.stages?.[0] || null;
+    }
     const ok = await exportToHighResPng({
       stage,
       projectName,
@@ -196,7 +199,11 @@ export default function EditorPage() {
 
   const handleExportPdf = async () => {
     const { projectName, floorName, unit, rooms, furniture, doorsWindows } = useEditorStore.getState();
-    const stage = Konva.stages[0] || null;
+    let stage: any = null;
+    if (typeof window !== "undefined") {
+      const KonvaModule = await import("konva");
+      stage = KonvaModule.default?.stages?.[0] || null;
+    }
     const ok = await exportToArchitecturalPdf({
       stage,
       projectName,

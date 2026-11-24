@@ -38,7 +38,7 @@ services:
       - key: NODE_VERSION
         value: 20
       - key: BACKEND_URL
-        value: https://roomsketch-backend-w807.onrender.com
+        value: https://roomsketch-backend.onrender.com
       - key: NEXT_PUBLIC_API_URL
         value: /api
 
