@@ -1,5 +1,14 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { useProjectStore } from "../src/store/projectStore";
+
+vi.mock("@/lib/api", () => ({
+  api: {
+    get: vi.fn().mockResolvedValue({ data: { success: true, data: [] } }),
+    post: vi.fn().mockResolvedValue({ data: { success: true, data: {} } }),
+    put: vi.fn().mockResolvedValue({ data: { success: true, data: {} } }),
+    delete: vi.fn().mockResolvedValue({ data: { success: true } }),
+  },
+}));
 
 describe("useProjectStore state management", () => {
   beforeEach(() => {

@@ -32,6 +32,8 @@ interface ProjectState {
   duplicateProject: (id: string) => Promise<Project>;
 }
 
+let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+
 export const useProjectStore = create<ProjectState>((set, get) => ({
   projects: [],
   stats: null,
@@ -43,7 +45,12 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
 
   setSearchQuery: (searchQuery) => {
     set({ searchQuery });
-    get().fetchProjects();
+    if (searchDebounceTimer) {
+      clearTimeout(searchDebounceTimer);
+    }
+    searchDebounceTimer = setTimeout(() => {
+      get().fetchProjects();
+    }, 300);
   },
 
   setSortBy: (sortBy) => {

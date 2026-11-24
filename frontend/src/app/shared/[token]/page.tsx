@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef } from "react";
 import dynamic from "next/dynamic";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import axios from "axios";
+import { api } from "@/lib/api";
 import { RoomItem, FurnitureItem, DoorWindowItem, FloorLayoutData, UnitSystem } from "@/types/editor";
 import { formatArea, formatDimension } from "@/lib/utils";
 import {
@@ -22,7 +22,6 @@ import {
   Check,
 } from "lucide-react";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
 
 // Dynamically import Konva components for client-side rendering
 const ReadOnlyStage = dynamic(
@@ -73,8 +72,8 @@ export default function SharedFloorPlanPage() {
   useEffect(() => {
     if (!token) return;
 
-    axios
-      .get(`${API_BASE_URL}/shared/${token}`)
+    api
+      .get(`/shared/${token}`)
       .then((res) => {
         if (res.data?.success) {
           const data = res.data.data as SharedProjectData;

@@ -2,6 +2,33 @@ import { create } from "zustand";
 import { User } from "@/types/auth";
 import { api } from "@/lib/api";
 
+const safeStorage = {
+  getItem: (key: string): string | null => {
+    if (typeof window === "undefined" || typeof localStorage === "undefined") return null;
+    try {
+      return localStorage.getItem(key);
+    } catch {
+      return null;
+    }
+  },
+  setItem: (key: string, value: string): void => {
+    if (typeof window === "undefined" || typeof localStorage === "undefined") return;
+    try {
+      localStorage.setItem(key, value);
+    } catch {
+      // Ignore quota or permission errors
+    }
+  },
+  removeItem: (key: string): void => {
+    if (typeof window === "undefined" || typeof localStorage === "undefined") return;
+    try {
+      localStorage.removeItem(key);
+    } catch {
+      // Ignore storage errors
+    }
+  },
+};
+
 interface AuthState {
   user: User | null;
   token: string | null;
@@ -20,8 +47,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isLoading: true,
 
   setAuth: (token: string, user: User) => {
-    localStorage.setItem("roomsketch_token", token);
-    localStorage.setItem("roomsketch_user", JSON.stringify(user));
+    safeStorage.setItem("roomsketch_token", token);
+    safeStorage.setItem("roomsketch_user", JSON.stringify(user));
     set({ token, user, isAuthenticated: true, isLoading: false });
   },
 
@@ -29,25 +56,20 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     const currentUser = get().user;
     if (currentUser) {
       const merged = { ...currentUser, ...updatedFields };
-      localStorage.setItem("roomsketch_user", JSON.stringify(merged));
+      safeStorage.setItem("roomsketch_user", JSON.stringify(merged));
       set({ user: merged });
     }
   },
 
   logout: () => {
-    localStorage.removeItem("roomsketch_token");
-    localStorage.removeItem("roomsketch_user");
+    safeStorage.removeItem("roomsketch_token");
+    safeStorage.removeItem("roomsketch_user");
     set({ token: null, user: null, isAuthenticated: false, isLoading: false });
   },
 
   initAuth: async () => {
-    if (typeof window === "undefined") {
-      set({ isLoading: false });
-      return;
-    }
-
-    const token = localStorage.getItem("roomsketch_token");
-    const storedUser = localStorage.getItem("roomsketch_user");
+    const token = safeStorage.getItem("roomsketch_token");
+    const storedUser = safeStorage.getItem("roomsketch_user");
 
     if (!token) {
       set({ isLoading: false, isAuthenticated: false, user: null, token: null });
@@ -62,12 +84,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const res = await api.get("/users/me");
       if (res.data.success) {
         const freshUser: User = res.data.data;
-        localStorage.setItem("roomsketch_user", JSON.stringify(freshUser));
+        safeStorage.setItem("roomsketch_user", JSON.stringify(freshUser));
         set({ user: freshUser, token, isAuthenticated: true, isLoading: false });
       }
     } catch {
-      localStorage.removeItem("roomsketch_token");
-      localStorage.removeItem("roomsketch_user");
+      safeStorage.removeItem("roomsketch_token");
+      safeStorage.removeItem("roomsketch_user");
       set({ user: null, token: null, isAuthenticated: false, isLoading: false });
     }
   },
