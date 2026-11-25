@@ -100,10 +100,3 @@ Test Files  14 passed (14)
 
 ---
 
-## 🗣️ Key Defense Points for Teacher / Examiner Review
-* **Q: Why did you choose client-side 3D rendering instead of server-side?**  
-  *A: By utilizing Three.js and WebGL directly in the browser, 3D tessellation and camera orbits execute at 60 FPS without transferring multi-megabyte glTF/OBJ models over the network, minimizing backend server load and hosting costs.*
-* **Q: How does your collision detection handle rotated furniture?**  
-  *A: Instead of standard Axis-Aligned Bounding Boxes (AABB) which produce false collisions when furniture is rotated, we implemented the Separating Axis Theorem (SAT) on Oriented Bounding Boxes (OBB), evaluating edge normals in under $5\text{ms}$.*
-* **Q: How does the system handle Render free-tier sleep cycles?**  
-  *A: We built an intelligent reconnection state machine: the frontend preserves cached sessions rather than logging out on HTTP 502/503 responses, and displays an automatic 6-second countdown that auto-retries login as soon as the container finishes booting.*
