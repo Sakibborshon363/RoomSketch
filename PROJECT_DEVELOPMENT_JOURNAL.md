@@ -246,15 +246,7 @@ Every capability documented above is validated through automated test suites:
 
 ---
 
-## 4. HOW TO USE THIS JOURNAL FOR EXAM / PROJECT DEFENSE
 
-When your teacher or supervisor opens your GitHub commit history and asks:
-> *"Explain what you did in each of these commits."*
-
-You can refer directly to this journal:
-1. **Show them this file (`PROJECT_DEVELOPMENT_JOURNAL.md`)** on GitHub.
-2. **Follow the Commit-by-Commit Log in §2**: Every commit has a short summary, technical mechanism, and exact defense explanation.
-3. **Highlight the 4 Technical Pillars**:
    - **Math & Physics**: Separating Axis Theorem (SAT) + 5-pass relaxation solver.
    - **Computer Graphics**: Three.js procedural WebGL extrusion with cutaway dollhouse walls.
    - **Architectural Engineering**: Multi-layer MEP systems + IBC 1005 code audit + BoQ takeoff formulas.
