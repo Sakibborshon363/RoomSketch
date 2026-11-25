@@ -4,9 +4,8 @@
 > **Source Repository:** [GitHub - Sakibborshon363/RoomSketch](https://github.com/Sakibborshon363/RoomSketch) (`main`)  
 > **Version:** `2.4.0-PROD` | **Testing Status:** 14 Test Suites, 93 Unit Tests Passed (100% Pass Rate)
 
----
 
-## 📋 Executive Overview & Technical Contributions
+Executive Overview & Technical Contributions
 
 RoomSketch is an architectural 2D & 3D Computer-Aided Design (CAD) and spatial planning web platform. It combines canvas-based vector modeling, procedural Three.js WebGL extrusion, automated International Building Code (IBC) Section 1005 compliance checks, and a deterministic Bill of Quantities (BoQ) material takeoff engine.
 
@@ -20,7 +19,6 @@ RoomSketch is an architectural 2D & 3D Computer-Aided Design (CAD) and spatial p
 * **⚙️ Autonomous SAT Collision Separator**: Separating Axis Theorem (SAT) collision detection for rotated boxes ($<5\text{ms}$) and 1-click iterative physics relaxation solver.
 * **☁️ Cloud Infrastructure as Code**: Decoupled multi-tier deployment on Render (`render.yaml`), Next.js server reverse proxy (`/api/*`), and standby wake-up fault tolerance.
 
----
 
 ## 🗂️ Commit-by-Commit Engineering Work Log
 
@@ -47,7 +45,6 @@ RoomSketch is an architectural 2D & 3D Computer-Aided Design (CAD) and spatial p
 | `9e22b14` | Resilience | Standby Handling | Session preservation during Render 502/503 wake-up and auto-reconnect timer on login page. | Eliminated unexpected logouts during Render container sleep cycles. |
 | `fe7fadd` | Docs | Work Journal | Added formal development journal (`PROJECT_DEVELOPMENT_JOURNAL.md`) mapping all commits. | Provided definitive project documentation for academic evaluation and defense. |
 
----
 
 ## 🔬 Mathematical & Algorithmic Formulations
 
@@ -83,20 +80,16 @@ When collisions or door obstructions are detected, the solver runs up to 5 passe
 * **Financial Total**: $C_{grand} = C_{direct} + (0.18 \times C_{direct}) + (0.08 \times (C_{direct} + C_{labor}))$
 </details>
 
----
 
 ## 🧪 Quality Assurance & Test Verification
 
-```
 Test Files  14 passed (14)
      Tests  93 passed (93) - 100% Pass Rate
   Duration  5.79s
-```
 
 * **Frontend Test Suites (Vitest)**: 14 suites / 93 tests passing (`shortcutsModal`, `aiArchitectEngine`, `projectStore`, `boqEngine`, `utils`, `floorAutosave`, `aiCopilotEngine`, `editorStore`, `authStore`, `engineeringLayers`, `furniture`, `collisionAndOpenings`, `threeDVisualizer`, `materialsExportShare`).
 * **Backend Test Suite (JUnit 5 / Mockito)**: 35 tests passing across 9 test classes.
 * **Combined Total**: **128 unit and integration tests passing (100%)**.
 * **Next.js Production Build**: 0 errors across all 8 static and dynamic routes.
 
----
 
