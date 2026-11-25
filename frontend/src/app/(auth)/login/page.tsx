@@ -12,7 +12,7 @@ import { useToast } from "@/components/ui/Toast";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/Card";
-import { Compass, Eye, EyeOff, Sparkles, ArrowRight, Zap, AlertCircle } from "lucide-react";
+import { Compass, Eye, EyeOff, Sparkles, ArrowRight, Zap, AlertCircle, Loader2, RefreshCw } from "lucide-react";
 
 const loginSchema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email address"),
@@ -29,6 +29,27 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isExpired, setIsExpired] = useState(false);
+  const [isWakingUp, setIsWakingUp] = useState(false);
+  const [retryCountdown, setRetryCountdown] = useState<number | null>(null);
+  const [pendingCredentials, setPendingCredentials] = useState<LoginFormValues | null>(null);
+
+  // Auto-retry countdown effect for cloud container wake-up
+  useEffect(() => {
+    if (retryCountdown === null) return;
+    if (retryCountdown <= 0) {
+      setRetryCountdown(null);
+      if (pendingCredentials) {
+        onSubmit(pendingCredentials);
+      }
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setRetryCountdown((prev) => (prev !== null ? prev - 1 : null));
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [retryCountdown, pendingCredentials]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -61,9 +82,13 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
     setErrorMessage(null);
+    setPendingCredentials(data);
     try {
       const response = await api.post("/auth/login", data);
       if (response.data.success) {
+        setIsWakingUp(false);
+        setRetryCountdown(null);
+        setPendingCredentials(null);
         const authData = response.data.data;
         setAuth(authData.token, {
           id: authData.id,
@@ -79,12 +104,19 @@ export default function LoginPage() {
       const axiosError = err as { response?: { status?: number; data?: { message?: string } } };
       let msg = "Invalid email or password. Please try again.";
       if (axiosError.response?.status === 502 || axiosError.response?.status === 503) {
-        msg = "The cloud server is currently waking up from standby sleep. Please click again in a few seconds.";
+        setIsWakingUp(true);
+        setRetryCountdown(6);
+        msg = "The cloud server is waking up from standby sleep (~30s on free tier).";
       } else if (axiosError.response?.data?.message) {
+        setIsWakingUp(false);
+        setRetryCountdown(null);
         msg = axiosError.response.data.message;
+      } else {
+        setIsWakingUp(false);
+        setRetryCountdown(null);
       }
       setErrorMessage(msg);
-      toastError("Authentication failed", msg);
+      toastError("Authentication status", msg);
     } finally {
       setIsLoading(false);
     }
@@ -146,11 +178,36 @@ export default function LoginPage() {
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {errorMessage && (
+            {isWakingUp ? (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-3.5 text-xs text-amber-900 shadow-sm animate-in fade-in space-y-2">
+                <div className="flex items-center gap-2 font-semibold text-amber-800">
+                  <Loader2 className="h-4 w-4 animate-spin text-amber-600" />
+                  <span>Cloud Container Waking Up</span>
+                </div>
+                <p className="text-amber-700 leading-relaxed">
+                  Render puts idle free-tier instances to sleep. The Java backend is booting up now.
+                </p>
+                <div className="flex items-center justify-between pt-1">
+                  <span className="font-medium text-amber-800">
+                    Auto-connecting in {retryCountdown ?? 0}s...
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (pendingCredentials) onSubmit(pendingCredentials);
+                    }}
+                    disabled={isLoading}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-200 hover:bg-amber-300 text-amber-900 font-semibold transition-colors"
+                  >
+                    <RefreshCw className={`h-3 w-3 ${isLoading ? "animate-spin" : ""}`} /> Retry Now
+                  </button>
+                </div>
+              </div>
+            ) : errorMessage ? (
               <div className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm font-medium text-rose-700 animate-in fade-in">
                 {errorMessage}
               </div>
-            )}
+            ) : null}
 
             <Input
               id="email"

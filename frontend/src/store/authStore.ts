@@ -87,10 +87,26 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         safeStorage.setItem("roomsketch_user", JSON.stringify(freshUser));
         set({ user: freshUser, token, isAuthenticated: true, isLoading: false });
       }
-    } catch {
-      safeStorage.removeItem("roomsketch_token");
-      safeStorage.removeItem("roomsketch_user");
-      set({ user: null, token: null, isAuthenticated: false, isLoading: false });
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { status?: number } };
+      // Only wipe session if the server explicitly rejected the token as unauthorized (401)
+      if (axiosErr.response?.status === 401) {
+        safeStorage.removeItem("roomsketch_token");
+        safeStorage.removeItem("roomsketch_user");
+        set({ user: null, token: null, isAuthenticated: false, isLoading: false });
+      } else {
+        // If the server returned 502/503 (waking up from standby) or a temporary network glitch,
+        // preserve the authenticated session from local cache so the user is not abruptly kicked out
+        if (storedUser) {
+          try {
+            set({ user: JSON.parse(storedUser), token, isAuthenticated: true, isLoading: false });
+          } catch {
+            set({ isLoading: false });
+          }
+        } else {
+          set({ isLoading: false });
+        }
+      }
     }
   },
 }));
