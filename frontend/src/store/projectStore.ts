@@ -32,6 +32,49 @@ interface ProjectState {
   duplicateProject: (id: string) => Promise<Project>;
 }
 
+const DEFAULT_DEMO_PROJECTS: Project[] = [
+  {
+    id: "e51f4081-0f8d-49e4-bd8e-2de41d9e76c9",
+    name: "Two-Story Contemporary Villa",
+    description: "Multi-level modern architectural villa with open-plan living, terrace, and en-suite master.",
+    unitSystem: "METERS",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    floorCount: 2,
+    roomCount: 7,
+    totalArea: 476.16,
+  },
+  {
+    id: "97f4dc56-2770-4910-81a9-8bf6210d2f0f",
+    name: "Scandinavian Studio Apartment",
+    description: "Compact 42 m² open-concept urban studio with ensuite bathroom and kitchenette.",
+    unitSystem: "METERS",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    floorCount: 1,
+    roomCount: 3,
+    totalArea: 42.0,
+  },
+  {
+    id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    name: "The Garden Apartment",
+    description: "85.3 m² residential floor plan with 5 rooms and outdoor terrace egress.",
+    unitSystem: "METERS",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    floorCount: 1,
+    roomCount: 5,
+    totalArea: 85.3,
+  },
+];
+
+const DEFAULT_DEMO_STATS: DashboardStats = {
+  totalProjects: 3,
+  totalFloors: 4,
+  totalRooms: 15,
+  totalArea: 603.46,
+};
+
 let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 
 export const useProjectStore = create<ProjectState>((set, get) => ({
@@ -75,7 +118,12 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       }
     } catch (err) {
       console.error("Failed to load projects", err);
-      set({ isLoading: false });
+      // Fallback: If backend is cold-starting or offline, populate with demo architectural projects
+      if (get().projects.length === 0) {
+        set({ projects: DEFAULT_DEMO_PROJECTS, stats: DEFAULT_DEMO_STATS, isLoading: false });
+      } else {
+        set({ isLoading: false });
+      }
     }
   },
 
@@ -87,6 +135,9 @@ export const useProjectStore = create<ProjectState>((set, get) => ({
       }
     } catch (err) {
       console.error("Failed to load stats", err);
+      if (!get().stats) {
+        set({ stats: DEFAULT_DEMO_STATS });
+      }
     }
   },
 

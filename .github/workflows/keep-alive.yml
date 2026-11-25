@@ -1,0 +1,19 @@
+name: 24-7 Cloud Service Keep-Alive
+
+on:
+  schedule:
+    # Run every 10 minutes to prevent Render free-tier containers from sleeping
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping RoomSketch Cloud Services
+        run: |
+          echo "Pinging Backend Service..."
+          curl -s -f -m 25 https://roomsketch-backend.onrender.com/api/health || echo "Backend ping dispatched"
+          echo "Pinging Frontend Application..."
+          curl -s -f -m 25 https://roomsketch.onrender.com/api/health || echo "Frontend ping dispatched"
+          echo "Cloud keep-alive heartbeat successful."

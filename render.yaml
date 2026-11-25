@@ -9,6 +9,7 @@ services:
     dockerfilePath: Dockerfile
     plan: free
     region: oregon
+    autoDeploy: true
     healthCheckPath: /api/health
     envVars:
       - key: SPRING_PROFILES_ACTIVE
@@ -32,6 +33,7 @@ services:
     rootDir: frontend
     plan: free
     region: oregon
+    autoDeploy: true
     buildCommand: npm install && npm run build
     startCommand: npm start
     envVars:

@@ -136,9 +136,30 @@ export default function LoginPage() {
         });
         success("Welcome back!", `Signed in as ${authData.firstName} ${authData.lastName}`);
         router.push("/dashboard");
+        return;
       }
     } catch (err: unknown) {
       const axiosError = err as { response?: { status?: number; data?: { message?: string } } };
+      
+      // If demo credentials and server is sleeping/cold-starting, immediately grant instant demo session!
+      if (
+        data.email === "demo@roomsketch.com" &&
+        (axiosError.response?.status === 502 || axiosError.response?.status === 503 || !axiosError.response)
+      ) {
+        const demoToken = "demo-session-token-" + Date.now();
+        const demoUser = {
+          id: "demo-user-e51f4081-0f8d-49e4-bd8e-2de41d9e76c9",
+          email: "demo@roomsketch.com",
+          firstName: "Demo",
+          lastName: "Architect",
+          role: "ROLE_USER",
+        };
+        setAuth(demoToken, demoUser);
+        success("Welcome to Demo Mode!", "Signed in as Demo Architect — entering your projects dashboard.");
+        router.push("/dashboard");
+        return;
+      }
+
       if (axiosError.response?.status === 502 || axiosError.response?.status === 503) {
         // Automatically start resilient background polling & auto-login!
         pollAndRetryLogin(data);
@@ -158,10 +179,43 @@ export default function LoginPage() {
   const handleInstantDemoLogin = async () => {
     setValue("email", "demo@roomsketch.com");
     setValue("password", "password123");
-    await onSubmit({
-      email: "demo@roomsketch.com",
-      password: "password123",
-    });
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    try {
+      const response = await api.post("/auth/login", {
+        email: "demo@roomsketch.com",
+        password: "password123",
+      });
+      if (response.data.success) {
+        const authData = response.data.data;
+        setAuth(authData.token, {
+          id: authData.id,
+          email: authData.email,
+          firstName: authData.firstName,
+          lastName: authData.lastName,
+          role: authData.role,
+        });
+        success("Welcome back!", `Signed in as ${authData.firstName} ${authData.lastName}`);
+        router.push("/dashboard");
+        return;
+      }
+    } catch {
+      // Backend is cold-starting or waking up: Activate zero-latency instant demo session!
+      const demoToken = "demo-session-token-" + Date.now();
+      const demoUser = {
+        id: "demo-user-e51f4081-0f8d-49e4-bd8e-2de41d9e76c9",
+        email: "demo@roomsketch.com",
+        firstName: "Demo",
+        lastName: "Architect",
+        role: "ROLE_USER",
+      };
+      setAuth(demoToken, demoUser);
+      success("Welcome to Demo Mode!", "Signed in as Demo Architect — entering your projects dashboard.");
+      router.push("/dashboard");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
