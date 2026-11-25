@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/Toast";
+import { ServerKeepAlive } from "@/components/shared/ServerKeepAlive";
 
 export const metadata: Metadata = {
   title: "RoomSketch | Professional 2D & 3D Architectural CAD & Interior Planning",
@@ -15,6 +16,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen bg-slate-50 text-slate-900 antialiased selection:bg-brand-500 selection:text-white">
+        <ServerKeepAlive />
         <ToastProvider>{children}</ToastProvider>
       </body>
     </html>

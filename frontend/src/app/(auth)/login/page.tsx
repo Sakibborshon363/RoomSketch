@@ -30,26 +30,64 @@ export default function LoginPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isExpired, setIsExpired] = useState(false);
   const [isWakingUp, setIsWakingUp] = useState(false);
-  const [retryCountdown, setRetryCountdown] = useState<number | null>(null);
+  const [wakeUpSeconds, setWakeUpSeconds] = useState(0);
   const [pendingCredentials, setPendingCredentials] = useState<LoginFormValues | null>(null);
 
-  // Auto-retry countdown effect for cloud container wake-up
+  // Proactively ping health endpoint on mount to trigger backend warm-up as early as possible
   useEffect(() => {
-    if (retryCountdown === null) return;
-    if (retryCountdown <= 0) {
-      setRetryCountdown(null);
-      if (pendingCredentials) {
-        onSubmit(pendingCredentials);
+    fetch("/api/health", { cache: "no-store" }).catch(() => {
+      // Ignore initial warm-up errors
+    });
+  }, []);
+
+  // Poll /api/health until it responds with 200, then automatically login!
+  const pollAndRetryLogin = (credentials: LoginFormValues) => {
+    setIsWakingUp(true);
+    setIsLoading(true);
+    setErrorMessage(null);
+    setPendingCredentials(credentials);
+    setWakeUpSeconds(0);
+
+    const startTime = Date.now();
+    const maxWaitMs = 90000; // 90 seconds max wait
+
+    const interval = setInterval(async () => {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      setWakeUpSeconds(elapsed);
+
+      try {
+        const healthRes = await fetch("/api/health", { cache: "no-store" });
+        if (healthRes.ok) {
+          clearInterval(interval);
+          // Backend is awake! Submit login immediately!
+          const loginRes = await api.post("/auth/login", credentials);
+          if (loginRes.data.success) {
+            setIsWakingUp(false);
+            setIsLoading(false);
+            const authData = loginRes.data.data;
+            setAuth(authData.token, {
+              id: authData.id,
+              email: authData.email,
+              firstName: authData.firstName,
+              lastName: authData.lastName,
+              role: authData.role,
+            });
+            success("Welcome back!", `Signed in as ${authData.firstName} ${authData.lastName}`);
+            router.push("/dashboard");
+          }
+        }
+      } catch {
+        // Container still booting up, continue polling
       }
-      return;
-    }
 
-    const timer = setTimeout(() => {
-      setRetryCountdown((prev) => (prev !== null ? prev - 1 : null));
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [retryCountdown, pendingCredentials]);
+      if (Date.now() - startTime > maxWaitMs) {
+        clearInterval(interval);
+        setIsLoading(false);
+        setIsWakingUp(false);
+        setErrorMessage("Cloud server took longer than expected to wake up. Please click below to try again.");
+      }
+    }, 2500);
+  };
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -87,7 +125,6 @@ export default function LoginPage() {
       const response = await api.post("/auth/login", data);
       if (response.data.success) {
         setIsWakingUp(false);
-        setRetryCountdown(null);
         setPendingCredentials(null);
         const authData = response.data.data;
         setAuth(authData.token, {
@@ -102,23 +139,19 @@ export default function LoginPage() {
       }
     } catch (err: unknown) {
       const axiosError = err as { response?: { status?: number; data?: { message?: string } } };
-      let msg = "Invalid email or password. Please try again.";
       if (axiosError.response?.status === 502 || axiosError.response?.status === 503) {
-        setIsWakingUp(true);
-        setRetryCountdown(6);
-        msg = "The cloud server is waking up from standby sleep (~30s on free tier).";
-      } else if (axiosError.response?.data?.message) {
-        setIsWakingUp(false);
-        setRetryCountdown(null);
+        // Automatically start resilient background polling & auto-login!
+        pollAndRetryLogin(data);
+        return;
+      }
+      setIsLoading(false);
+      setIsWakingUp(false);
+      let msg = "Invalid email or password. Please try again.";
+      if (axiosError.response?.data?.message) {
         msg = axiosError.response.data.message;
-      } else {
-        setIsWakingUp(false);
-        setRetryCountdown(null);
       }
       setErrorMessage(msg);
-      toastError("Authentication status", msg);
-    } finally {
-      setIsLoading(false);
+      toastError("Authentication failed", msg);
     }
   };
 
@@ -168,7 +201,8 @@ export default function LoginPage() {
               isLoading={isLoading}
               className="w-full bg-[#1E3A34] hover:bg-[#254A42] text-white font-bold text-xs shadow-sm py-2"
             >
-              <Zap className="h-3.5 w-3.5 mr-1.5 text-amber-300" /> 1-Click Instant Demo Login
+              <Zap className="h-3.5 w-3.5 mr-1.5 text-amber-300" />
+              {isWakingUp ? `Waking Up Cloud Server (${wakeUpSeconds}s)...` : "1-Click Instant Demo Login"}
             </Button>
           </div>
 
@@ -179,27 +213,29 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {isWakingUp ? (
-              <div className="rounded-xl border border-amber-200 bg-amber-50 p-3.5 text-xs text-amber-900 shadow-sm animate-in fade-in space-y-2">
-                <div className="flex items-center gap-2 font-semibold text-amber-800">
-                  <Loader2 className="h-4 w-4 animate-spin text-amber-600" />
-                  <span>Cloud Container Waking Up</span>
+              <div className="rounded-xl border border-brand-200 bg-brand-50/90 p-4 text-xs text-brand-900 shadow-sm animate-in fade-in space-y-3">
+                <div className="flex items-center gap-2 font-bold text-brand-800 text-sm">
+                  <Loader2 className="h-4 w-4 animate-spin text-brand-600 shrink-0" />
+                  <span>Waking Up Cloud Server...</span>
                 </div>
-                <p className="text-amber-700 leading-relaxed">
-                  Render puts idle free-tier instances to sleep. The Java backend is booting up now.
+                <p className="text-brand-700 leading-relaxed">
+                  Render puts idle free-tier instances to sleep after 15 min. The Java Spring Boot backend is booting up now ({wakeUpSeconds}s elapsed).
                 </p>
+                <div className="w-full bg-brand-200/60 rounded-full h-1.5 overflow-hidden">
+                  <div className="bg-brand-600 h-1.5 rounded-full animate-pulse w-3/4" />
+                </div>
                 <div className="flex items-center justify-between pt-1">
-                  <span className="font-medium text-amber-800">
-                    Auto-connecting in {retryCountdown ?? 0}s...
+                  <span className="font-semibold text-brand-800 text-[11px]">
+                    ✨ You will be signed in automatically the moment it boots!
                   </span>
                   <button
                     type="button"
                     onClick={() => {
-                      if (pendingCredentials) onSubmit(pendingCredentials);
+                      if (pendingCredentials) pollAndRetryLogin(pendingCredentials);
                     }}
-                    disabled={isLoading}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-200 hover:bg-amber-300 text-amber-900 font-semibold transition-colors"
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-brand-200 hover:bg-brand-300 text-brand-900 font-semibold transition-colors"
                   >
-                    <RefreshCw className={`h-3 w-3 ${isLoading ? "animate-spin" : ""}`} /> Retry Now
+                    <RefreshCw className="h-3 w-3" /> Retry Now
                   </button>
                 </div>
               </div>
@@ -237,7 +273,7 @@ export default function LoginPage() {
             </div>
 
             <Button type="submit" className="w-full mt-2 font-semibold shadow-sm" isLoading={isLoading}>
-              Sign In <ArrowRight className="h-4 w-4 ml-1.5" />
+              {isWakingUp ? `Waking Up Server (${wakeUpSeconds}s)...` : "Sign In"} <ArrowRight className="h-4 w-4 ml-1.5" />
             </Button>
           </form>
         </CardContent>
