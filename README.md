@@ -27,6 +27,10 @@ You can evaluate all platform features without manual registration:
   - **Email:** `demo@roomsketch.com`
   - **Password:** `password123`
 
+### 📚 Official Project Documentation & Engineering Logs
+- **[Full IEEE 830 SRS & System Design Specification (ROOMSKETCH_SRS_SYSTEM_DESIGN.md)](ROOMSKETCH_SRS_SYSTEM_DESIGN.md)** — Exhaustive formal specifications, 3-tier cloud architecture diagrams, database data dictionary, mathematical derivations (SAT, BoQ, IBC heuristics), and REST API interface contracts.
+- **[Commit-by-Commit Work Journal & Engineering Log (PROJECT_DEVELOPMENT_JOURNAL.md)](PROJECT_DEVELOPMENT_JOURNAL.md)** — Detailed chronological record of every git commit, architectural rationale, technical mechanisms, and defense explanations for academic evaluation.
+
 ---
 
 ## 1. Project Overview
