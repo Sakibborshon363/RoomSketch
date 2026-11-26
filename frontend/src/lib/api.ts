@@ -25,6 +25,11 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
+        const token = localStorage.getItem("roomsketch_token");
+        // If the user is on an instant demo session, preserve their session and do not redirect
+        if (token && token.startsWith("demo-session-token-")) {
+          return Promise.reject(error);
+        }
         localStorage.removeItem("roomsketch_token");
         localStorage.removeItem("roomsketch_user");
         if (
