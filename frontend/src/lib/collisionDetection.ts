@@ -440,3 +440,8 @@ export function resolveAllLayoutCollisions(
     remainingCollisions: finalValidation.warnings.length,
   };
 }
+
+/**
+ * 1-Click Alias for resolving all layout collisions and obstructions
+ */
+export const autoResolveCollisions = resolveAllLayoutCollisions;

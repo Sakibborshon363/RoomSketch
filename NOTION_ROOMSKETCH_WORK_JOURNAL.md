@@ -2,7 +2,7 @@
 > **Status:** Completed & Deployed to Production 🟢  
 > **Live System:** [https://roomsketch.onrender.com](https://roomsketch.onrender.com)  
 > **Source Repository:** [GitHub - Sakibborshon363/RoomSketch](https://github.com/Sakibborshon363/RoomSketch) (`main`)  
-> **Version:** `2.5.0-PROD` | **Testing Status:** 15 Test Suites, 101 Unit Tests Passed (100% Pass Rate)
+> **Version:** `2.6.0-PROD` | **Testing Status:** 16 Test Suites, 113 Unit Tests Passed (100% Pass Rate)
 
 
 Executive Overview & Technical Contributions
@@ -45,6 +45,7 @@ RoomSketch is an architectural 2D & 3D Computer-Aided Design (CAD) and spatial p
 | `9e22b14` | Resilience | Standby Handling | Session preservation during Render 502/503 wake-up and auto-reconnect timer on login page. | Eliminated unexpected logouts during Render container sleep cycles. |
 | `fe7fadd` | Docs | Work Journal | Added formal development journal (`PROJECT_DEVELOPMENT_JOURNAL.md`) mapping all commits. | Provided definitive project documentation for academic evaluation and defense. |
 | `a83e1c9` | Phase 9 | Architectural Transition | Floor Plan to Architectural View transition engine (`elevationEngine.ts`, `CadElevationViewer.tsx`, `ArchitecturalViewViewer.tsx`), datum level markers (`+1'-6"` to `+61'-6"`), 45° architectural dimension ticks, title blocks, and external image reference upload. | Bridged 2D floor plans with AutoCAD-grade orthographic elevations and AI-suggested photorealistic building façades. |
+| `6b3f11e` | Phase 10 | AI & Auto-Architecture | AI Automated 2D Plan & Structure Generator (`aiStructureGenerator.ts`), RCC 30x30cm structural column grids, 1-Click SAT collision auto-fix (`autoResolveCollisions`), and Photo-to-Architecture AI (`imageToArchitectureEngine.ts`, `ImageToArchitectureModal.tsx`) reverse-engineering building photos into structural blueprints. | Automated end-to-end architectural synthesis from online building photos and 1-click collision separation. |
 
 
 ## 🔬 Mathematical & Algorithmic Formulations

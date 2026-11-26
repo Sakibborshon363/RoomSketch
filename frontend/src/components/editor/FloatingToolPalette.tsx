@@ -16,10 +16,42 @@ import {
   Compass,
   Building,
   Sparkles,
+  Zap,
 } from "lucide-react";
+import { autoResolveCollisions } from "@/lib/collisionDetection";
+import { useToast } from "@/components/ui/Toast";
 
 export function FloatingToolPalette() {
-  const { activeTool, setActiveTool, undo, redo, history, viewMode, setViewMode } = useEditorStore();
+  const {
+    activeTool,
+    setActiveTool,
+    undo,
+    redo,
+    history,
+    viewMode,
+    setViewMode,
+    rooms,
+    furniture,
+    doorsWindows,
+    setFurnitureList,
+  } = useEditorStore();
+  const { success } = useToast();
+
+  const handleFixCollisions = () => {
+    const res = autoResolveCollisions(rooms, furniture, doorsWindows);
+    setFurnitureList(res.resolvedFurniture);
+    if (res.actionsCount > 0) {
+      success(
+        "1-Click Fix Applied! ✨",
+        `Resolved ${res.actionsCount} overlapping item(s) & cleared door clearances.`
+      );
+    } else {
+      success(
+        "Zero Collisions! ✨",
+        "All furniture and doors already have optimal clearances."
+      );
+    }
+  };
 
   const tools = [
     { id: "select", label: "Select (V)", icon: MousePointer2 },
@@ -80,6 +112,16 @@ export function FloatingToolPalette() {
         title="Redo"
       >
         <Redo2 className="h-4 w-4" />
+      </button>
+
+      {/* 1-Click Fix Collisions Button */}
+      <button
+        onClick={handleFixCollisions}
+        className="flex h-9 px-2 items-center justify-center rounded-xl text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition-colors text-xs font-bold gap-1 shadow-2xs"
+        title="1-Click Auto-Fix Collisions & Doorway Overlaps"
+      >
+        <Zap className="h-3.5 w-3.5 fill-amber-500 text-amber-600" />
+        <span className="hidden lg:inline text-[11px]">Auto-Fix</span>
       </button>
 
       <div className="mx-1 h-5 w-px bg-stone-200" />

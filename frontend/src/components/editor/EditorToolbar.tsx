@@ -21,6 +21,10 @@ import {
   Sparkles,
   HelpCircle,
   Calculator,
+  Zap,
+  Upload,
+  Wand2,
+  Building,
 } from "lucide-react";
 
 interface EditorToolbarProps {
@@ -30,6 +34,10 @@ interface EditorToolbarProps {
   onOpenShortcuts?: () => void;
   onOpenBoQ?: () => void;
   onOpenAiAdvisor?: () => void;
+  onAutoFixCollisions?: () => void;
+  onOpenImageToArch?: () => void;
+  onOpenAiPlanGen?: () => void;
+  collisionCount?: number;
 }
 
 export function EditorToolbar({
@@ -39,6 +47,10 @@ export function EditorToolbar({
   onOpenShortcuts,
   onOpenBoQ,
   onOpenAiAdvisor,
+  onAutoFixCollisions,
+  onOpenImageToArch,
+  onOpenAiPlanGen,
+  collisionCount = 0,
 }: EditorToolbarProps) {
   const {
     projectName,
@@ -308,17 +320,54 @@ export function EditorToolbar({
           </Button>
         )}
 
-        {/* AI Ergonomics & Auto-Furnish Advisor */}
-        {onOpenAiAdvisor && (
+        {/* 1-Click Fix Collisions Button (Phase 9) */}
+        {onAutoFixCollisions && (
           <Button
             variant="outline"
             size="sm"
-            onClick={onOpenAiAdvisor}
-            className="text-xs font-bold gap-1.5 h-9 border-purple-200 text-purple-800 hover:bg-purple-50 hover:border-purple-300"
-            title="AI Architectural Ergonomics & 1-Click Auto-Furnish"
+            onClick={onAutoFixCollisions}
+            className={`text-xs font-bold gap-1.5 h-9 transition-all ${
+              collisionCount > 0
+                ? "border-amber-400 bg-amber-50 text-amber-900 animate-pulse hover:bg-amber-100 ring-2 ring-amber-300"
+                : "border-amber-200 text-amber-800 hover:bg-amber-50"
+            }`}
+            title="1-Click Fix Overlapping Furniture & Clear Doorways"
           >
-            <Sparkles className="h-3.5 w-3.5 text-purple-600" />
-            <span className="hidden sm:inline">AI Advisor</span>
+            <Zap className={`h-3.5 w-3.5 ${collisionCount > 0 ? "fill-amber-500 text-amber-600" : "text-amber-500"}`} />
+            <span>1-Click Fix</span>
+            {collisionCount > 0 && (
+              <span className="rounded-full bg-rose-500 text-white text-[9px] px-1.5 py-0.2 font-black">
+                {collisionCount}
+              </span>
+            )}
+          </Button>
+        )}
+
+        {/* Photo-to-Architecture AI (Upload Building Online) */}
+        {onOpenImageToArch && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onOpenImageToArch}
+            className="text-xs font-bold gap-1.5 h-9 border-[#1E3A34]/30 text-[#1E3A34] hover:bg-[#1E3A34]/5"
+            title="Upload Any Online Building Picture to Generate Full 2D & 3D Architectural Design"
+          >
+            <Upload className="h-3.5 w-3.5 text-[#1E3A34]" />
+            <span className="hidden xl:inline">Photo-to-Blueprint AI</span>
+          </Button>
+        )}
+
+        {/* AI Automated Plan & Structure Generator */}
+        {onOpenAiPlanGen && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onOpenAiPlanGen}
+            className="text-xs font-bold gap-1.5 h-9 border-sky-300 text-sky-800 hover:bg-sky-50"
+            title="AI Automated 2D Plan & Multi-Story Structure Generator"
+          >
+            <Wand2 className="h-3.5 w-3.5 text-sky-600" />
+            <span className="hidden xl:inline">AI Plan Gen</span>
           </Button>
         )}
 

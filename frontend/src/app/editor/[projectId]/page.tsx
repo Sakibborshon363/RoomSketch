@@ -17,6 +17,10 @@ import { ShortcutsModal } from "@/components/editor/ShortcutsModal";
 import { BoQModal } from "@/components/editor/BoQModal";
 import { AiAdvisorModal } from "@/components/editor/AiAdvisorModal";
 import { AiCopilotDrawer } from "@/components/editor/AiCopilotDrawer";
+import { ImageToArchitectureModal } from "@/components/editor/ImageToArchitectureModal";
+import { AiPlanGeneratorModal } from "@/components/editor/AiPlanGeneratorModal";
+import { autoResolveCollisions, validateLayout } from "@/lib/collisionDetection";
+import { GeneratedStructurePlan } from "@/lib/aiStructureGenerator";
 import { Loader2, Download, Share2, Copy, Check, ExternalLink, ShieldAlert, Sparkles } from "lucide-react";
 import { api } from "@/lib/api";
 import { exportToHighResPng, exportToArchitecturalPdf } from "@/lib/exportEngine";
@@ -111,10 +115,45 @@ export default function EditorPage() {
   const [shortcutsModalOpen, setShortcutsModalOpen] = useState(false);
   const [boqModalOpen, setBoqModalOpen] = useState(false);
   const [aiAdvisorModalOpen, setAiAdvisorModalOpen] = useState(false);
+  const [imageToArchModalOpen, setImageToArchModalOpen] = useState(false);
+  const [aiPlanGenModalOpen, setAiPlanGenModalOpen] = useState(false);
+
+  // Active layout warnings & collisions count
+  const collisionCount = React.useMemo(() => {
+    return validateLayout(rooms, furniture, doorsWindows).warnings.length;
+  }, [rooms, furniture, doorsWindows]);
 
   const handleApplyAutoFurnish = (items: any[], roomName: string) => {
     useEditorStore.getState().addBatchFurniture(items);
     success("AI Auto-Furnish Applied", `Placed ${items.length} fixtures in "${roomName}".`);
+  };
+
+  const handleApplyGeneratedPlan = (plan: GeneratedStructurePlan) => {
+    useEditorStore.getState().addBatchRooms(plan.rooms);
+    plan.doorsWindows.forEach((dw) => useEditorStore.getState().addDoorWindow(dw));
+    if (plan.furniture.length > 0) {
+      useEditorStore.getState().addBatchFurniture(plan.furniture);
+    }
+    success(
+      "Architectural Structure Synthesized! 🏛️",
+      `Loaded "${plan.name}" with ${plan.rooms.length} rooms, ${plan.doorsWindows.length} openings & structural columns.`
+    );
+  };
+
+  const handleOneClickAutoFixCollisions = () => {
+    const res = autoResolveCollisions(rooms, furniture, doorsWindows);
+    useEditorStore.getState().setFurnitureList(res.resolvedFurniture);
+    if (res.actionsCount > 0) {
+      success(
+        "1-Click Fix Applied! ✨",
+        `Resolved ${res.actionsCount} overlapping item(s) & cleared all door swing paths.`
+      );
+    } else {
+      success(
+        "Zero Collisions! ✨",
+        "All furniture, doors, and walls already satisfy optimal architectural clearances."
+      );
+    }
   };
 
   useEffect(() => {
@@ -351,6 +390,10 @@ export default function EditorPage() {
           onOpenShortcuts={() => setShortcutsModalOpen(true)}
           onOpenBoQ={() => setBoqModalOpen(true)}
           onOpenAiAdvisor={() => setAiAdvisorModalOpen(true)}
+          onAutoFixCollisions={handleOneClickAutoFixCollisions}
+          onOpenImageToArch={() => setImageToArchModalOpen(true)}
+          onOpenAiPlanGen={() => setAiPlanGenModalOpen(true)}
+          collisionCount={collisionCount}
         />
 
         {/* Center Workspace Layout */}
@@ -506,6 +549,20 @@ export default function EditorPage() {
             useEditorStore.getState().setFurnitureList(fixedFurniture);
             success("Autonomous Fix Applied", `Resolved ${count} layout collision(s) & clearance issues.`);
           }}
+        />
+
+        {/* AI Photo-to-Architecture Modal (Upload Online Building Picture) */}
+        <ImageToArchitectureModal
+          isOpen={imageToArchModalOpen}
+          onClose={() => setImageToArchModalOpen(false)}
+          onApplyProject={handleApplyGeneratedPlan}
+        />
+
+        {/* AI Automated 2D Plan & Structure Generator Modal */}
+        <AiPlanGeneratorModal
+          isOpen={aiPlanGenModalOpen}
+          onClose={() => setAiPlanGenModalOpen(false)}
+          onApplyPlan={handleApplyGeneratedPlan}
         />
 
         {/* RoomSketch AI Architectural Copilot Chatbot */}
