@@ -53,6 +53,38 @@ const ThreeSceneViewer = dynamic(
   }
 );
 
+// Dynamically import CadElevationViewer with SSR disabled
+const CadElevationViewer = dynamic(
+  () => import("@/components/editor/CadElevationViewer").then((m) => m.CadElevationViewer),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full w-full items-center justify-center bg-[#F8F9FA]">
+        <div className="flex flex-col items-center gap-2 text-stone-500">
+          <Loader2 className="h-8 w-8 animate-spin text-[#1E3A34]" />
+          <p className="text-xs font-semibold">Generating CAD Orthographic Elevation...</p>
+        </div>
+      </div>
+    ),
+  }
+);
+
+// Dynamically import ArchitecturalViewViewer with SSR disabled
+const ArchitecturalViewViewer = dynamic(
+  () => import("@/components/editor/ArchitecturalViewViewer").then((m) => m.ArchitecturalViewViewer),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full w-full items-center justify-center bg-stone-100">
+        <div className="flex flex-col items-center gap-2 text-stone-500">
+          <Loader2 className="h-8 w-8 animate-spin text-[#1E3A34]" />
+          <p className="text-xs font-semibold">Synthesizing Architectural Façade Elevation...</p>
+        </div>
+      </div>
+    ),
+  }
+);
+
 export default function EditorPage() {
   const params = useParams();
   const projectId = params?.projectId as string;
@@ -326,7 +358,7 @@ export default function EditorPage() {
           {/* Left Tool Sidebar (Rail + Drawer) */}
           <EditorSidebar />
 
-          {/* Center Interactive 2D Canvas or 3D Spatial Scene */}
+          {/* Center Interactive 2D Canvas, 3D Spatial Scene, CAD Elevation, or Façade View */}
           <main className="relative flex-1 h-full overflow-hidden">
             {viewMode === "2D" ? (
               <>
@@ -336,8 +368,14 @@ export default function EditorPage() {
                 {/* Konva HTML5 2D Canvas */}
                 <EditorCanvas />
               </>
+            ) : viewMode === "ELEVATION_CAD" ? (
+              /* 2D Orthographic Technical CAD Elevation Viewer */
+              <CadElevationViewer />
+            ) : viewMode === "ARCHITECTURAL_VIEW" ? (
+              /* Photorealistic Architectural Façade Visualizer & AI Suggester */
+              <ArchitecturalViewViewer />
             ) : (
-              /* Three.js WebGL 3D Architectural Visualizer */
+              /* Three.js WebGL 3D Architectural Spatial Visualizer */
               <ThreeSceneViewer />
             )}
           </main>

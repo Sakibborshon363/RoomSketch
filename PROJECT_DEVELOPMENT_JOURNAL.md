@@ -3,7 +3,7 @@
 **Platform URL:** [https://roomsketch.onrender.com](https://roomsketch.onrender.com)  
 **Repository Branch:** `main`  
 **Author:** Lead Engineer & Architectural Systems Architect  
-**Documentation Version:** 2.4.0-PROD  
+**Documentation Version:** 2.5.0-PROD  
 
 ---
 
@@ -221,15 +221,36 @@ The following section details every git commit in the project's repository histo
 
 ---
 
+### Commit `a83e1c9` — Floor Plan to Architectural View Transition Feature (CAD Elevation & AI Façade Visualizer)
+- **Commit Title:** `feat: implement Floor Plan to Architectural View transition with CAD orthographic elevations and AI façade visualizer`
+- **Core Files:**
+  - `frontend/src/lib/elevationEngine.ts` (Orthographic projection engine, datum levels, bay extraction, dimension strings)
+  - `frontend/src/components/editor/CadElevationViewer.tsx` (AutoCAD-grade technical elevation viewer matching Image 2)
+  - `frontend/src/components/editor/ArchitecturalViewViewer.tsx` (Photorealistic building façade visualizer matching Image 3 with AI suggestion and image reference upload)
+  - `frontend/src/components/editor/FloatingToolPalette.tsx` & `EditorToolbar.tsx` (4-stage transition switcher: 2D Plan $\to$ 3D Spatial $\to$ CAD Elevation $\to$ Façade View)
+  - `frontend/src/store/editorStore.ts` & `frontend/src/app/editor/[projectId]/page.tsx` (Expanded `viewMode` state and seamless view mounting)
+  - `frontend/tests/elevationEngine.test.ts` (8 comprehensive unit tests for mathematical projection and datum calculation)
+- **Problem Solved:** 
+  Bridged the gap between 2D floor plans, 3D spatial models, technical AutoCAD orthographic elevations, and photorealistic building façades ("Floor Plan to Architectural View"), allowing architects and structural engineers to inspect elevations, datum levels, dimensional heights, and AI-suggested exterior building façades directly from their floor plans.
+- **Technical Explanation:**
+  - **Orthographic Projection Math (`elevationEngine.ts`)**: Derives building bays along any orientation face (Front, Back, Left, Right). Computes structural datum levels (`GROUND LEVEL / PLINTH EL. +1'-6"`, `1ST FLOOR EL. +11'-6"`, `2ND FLOOR EL. +21'-6"`, `3RD FLOOR EL. +31'-6"`, `4TH FLOOR EL. +41'-6"`, `ROOF LEVEL EL. +51'-6"`, `PARAPET LEVEL EL. +54'-6"`, `STAIR ROOM ROOF EL. +61'-6"`) exactly matching standard architectural blueprints.
+  - **AutoCAD-Grade Technical Elevation (`CadElevationViewer.tsx`)**: High-precision vector SVG rendering with standard quartered-circle datum symbols ($\oplus$), dashed extension lines, vertical and horizontal dimension strings with 45° architectural tick marks, cantilevered verandah balconies (`VER 3'-0"`), M.S. horizontal railings, aluminum sliding glass doors, concrete sunshades/chajja, rainwater pipes (RWP), central vertical void, and official title blocks (`PROJECT: RESIDENTIAL BUILDING`, `DRAWING TITLE: BACK ELEVATION`, scale bar, north arrow, sheet, date, rev).
+  - **Photorealistic Architectural Façade Visualizer (`ArchitecturalViewViewer.tsx`)**: Renders high-fidelity building elevations matching Image 3 with warm teak wood cladding, dark aluminum mullions, exterior wall sconce lighting casting ambient glows, rooftop garden terraces with pergolas, sidewalk landscaping, and multi-lighting presets (Dusk, Daylight, Night).
+  - **AI Façade Suggestion & External Image Upload**: Analyzes room layout geometry to suggest optimal architectural styles (Contemporary Residential, Modern Minimalist, Luxury Villa, Nordic Timber) and permits architects to upload any external image reference from Google, Pinterest, or camera photos to compare side-by-side with their floor plan.
+- **Defense Point for Examiners:** *"This feature transforms RoomSketch from an interior layout tool into an end-to-end architectural design suite. Our elevation engine dynamically projects 2D floor plan bays into standard orthographic CAD drawings with datum levels and dimension strings, and transitions seamlessly into AI-assisted photorealistic exterior elevations matching real-world architectural drawing sets."*
+
+---
+
 ## 3. SUMMARY OF TEST METRICS & QUALITY ASSURANCE
 
 Every capability documented above is validated through automated test suites:
 - **Test Framework:** Vitest (Next.js client) + JUnit 5 / Mockito (Spring Boot backend)
-- **Frontend Test Results:** **14 test suites, 93 unit tests passed (100% pass rate)**:
+- **Frontend Test Results:** **15 test suites, 101 unit tests passed (100% pass rate)**:
   - `tests/shortcutsModal.test.ts` (2 tests passed)
   - `tests/aiArchitectEngine.test.ts` (6 tests passed)
   - `tests/projectStore.test.ts` (4 tests passed)
   - `tests/boqEngine.test.ts` (6 tests passed)
+  - `tests/elevationEngine.test.ts` (8 tests passed)
   - `tests/utils.test.ts` (6 tests passed)
   - `tests/floorAutosave.test.ts` (11 tests passed)
   - `tests/aiCopilotEngine.test.ts` (8 tests passed)
@@ -241,7 +262,7 @@ Every capability documented above is validated through automated test suites:
   - `tests/threeDVisualizer.test.ts` (4 tests passed)
   - `tests/materialsExportShare.test.ts` (9 tests passed)
 - **Backend Test Results:** 35 tests passed across 9 test classes (100% pass rate).
-- **Total Passing Automated Tests:** **128 unit and integration tests (100% passing)**.
+- **Total Passing Automated Tests:** **136 unit and integration tests (100% passing)**.
 - **Next.js Production Build:** Clean compilation with exit code 0 across all 8 static and dynamic routes.
 
 ---

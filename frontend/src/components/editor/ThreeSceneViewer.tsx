@@ -328,6 +328,26 @@ export default function ThreeSceneViewer() {
           <span>2D Plan Mode</span>
         </Button>
 
+        {/* Transition to CAD Elevation Button */}
+        <Button
+          size="sm"
+          onClick={() => setViewMode("ELEVATION_CAD")}
+          className="bg-white hover:bg-stone-100 text-stone-800 text-xs font-bold gap-1.5 shadow-md border border-stone-200"
+        >
+          <Compass className="h-3.5 w-3.5 text-sky-600" />
+          <span>CAD Elevation &rarr;</span>
+        </Button>
+
+        {/* Transition to Façade View Button */}
+        <Button
+          size="sm"
+          onClick={() => setViewMode("ARCHITECTURAL_VIEW")}
+          className="bg-[#1E3A34] hover:bg-[#254A42] text-white text-xs font-bold gap-1.5 shadow-md"
+        >
+          <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+          <span>Façade View &rarr;</span>
+        </Button>
+
         {/* Camera Preset Segmented Control */}
         <div className="flex rounded-xl bg-white/95 backdrop-blur-md p-1 shadow-md border border-stone-200 text-xs font-bold">
           <button

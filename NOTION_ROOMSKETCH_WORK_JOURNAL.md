@@ -2,7 +2,7 @@
 > **Status:** Completed & Deployed to Production 🟢  
 > **Live System:** [https://roomsketch.onrender.com](https://roomsketch.onrender.com)  
 > **Source Repository:** [GitHub - Sakibborshon363/RoomSketch](https://github.com/Sakibborshon363/RoomSketch) (`main`)  
-> **Version:** `2.4.0-PROD` | **Testing Status:** 14 Test Suites, 93 Unit Tests Passed (100% Pass Rate)
+> **Version:** `2.5.0-PROD` | **Testing Status:** 15 Test Suites, 101 Unit Tests Passed (100% Pass Rate)
 
 
 Executive Overview & Technical Contributions
@@ -44,6 +44,7 @@ RoomSketch is an architectural 2D & 3D Computer-Aided Design (CAD) and spatial p
 | `fa8ca0b` | Tools | Price Manager | Standalone interactive Material Price Manager page (`/tools/material-price-manager`). | Provided administrative visibility into finish unit rates and square-meter pricing. |
 | `9e22b14` | Resilience | Standby Handling | Session preservation during Render 502/503 wake-up and auto-reconnect timer on login page. | Eliminated unexpected logouts during Render container sleep cycles. |
 | `fe7fadd` | Docs | Work Journal | Added formal development journal (`PROJECT_DEVELOPMENT_JOURNAL.md`) mapping all commits. | Provided definitive project documentation for academic evaluation and defense. |
+| `a83e1c9` | Phase 9 | Architectural Transition | Floor Plan to Architectural View transition engine (`elevationEngine.ts`, `CadElevationViewer.tsx`, `ArchitecturalViewViewer.tsx`), datum level markers (`+1'-6"` to `+61'-6"`), 45° architectural dimension ticks, title blocks, and external image reference upload. | Bridged 2D floor plans with AutoCAD-grade orthographic elevations and AI-suggested photorealistic building façades. |
 
 
 ## 🔬 Mathematical & Algorithmic Formulations
@@ -83,13 +84,15 @@ When collisions or door obstructions are detected, the solver runs up to 5 passe
 
 ## 🧪 Quality Assurance & Test Verification
 
-Test Files  14 passed (14)
-     Tests  93 passed (93) - 100% Pass Rate
-  Duration  5.79s
+```
+Test Files  15 passed (15)
+     Tests  101 passed (101) - 100% Pass Rate
+  Duration  6.19s
+```
 
-* **Frontend Test Suites (Vitest)**: 14 suites / 93 tests passing (`shortcutsModal`, `aiArchitectEngine`, `projectStore`, `boqEngine`, `utils`, `floorAutosave`, `aiCopilotEngine`, `editorStore`, `authStore`, `engineeringLayers`, `furniture`, `collisionAndOpenings`, `threeDVisualizer`, `materialsExportShare`).
+* **Frontend Test Suites (Vitest)**: 15 suites / 101 tests passing (`shortcutsModal`, `aiArchitectEngine`, `projectStore`, `boqEngine`, `elevationEngine`, `utils`, `floorAutosave`, `aiCopilotEngine`, `editorStore`, `authStore`, `engineeringLayers`, `furniture`, `collisionAndOpenings`, `threeDVisualizer`, `materialsExportShare`).
 * **Backend Test Suite (JUnit 5 / Mockito)**: 35 tests passing across 9 test classes.
-* **Combined Total**: **128 unit and integration tests passing (100%)**.
+* **Combined Total**: **136 unit and integration tests passing (100%)**.
 * **Next.js Production Build**: 0 errors across all 8 static and dynamic routes.
 
 

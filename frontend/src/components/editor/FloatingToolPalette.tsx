@@ -13,6 +13,9 @@ import {
   Undo2,
   Redo2,
   Box,
+  Compass,
+  Building,
+  Sparkles,
 } from "lucide-react";
 
 export function FloatingToolPalette() {
@@ -81,30 +84,54 @@ export function FloatingToolPalette() {
 
       <div className="mx-1 h-5 w-px bg-stone-200" />
 
-      {/* 2D / 3D Mode Switcher Toggle */}
+      {/* Floor Plan to Architectural View Transition Mode Switcher */}
       <div className="flex items-center rounded-xl bg-stone-100 p-0.5 text-xs font-bold">
         <button
           onClick={() => setViewMode("2D")}
-          className={`rounded-lg px-2.5 py-1 transition-all ${
+          className={`rounded-lg px-2 py-1 transition-all ${
             viewMode === "2D"
               ? "bg-[#1E3A34] text-white shadow-xs"
               : "text-stone-600 hover:text-stone-900"
           }`}
-          title="2D CAD Floor Plan View"
+          title="2D CAD Floor Plan Editor"
         >
           2D Plan
         </button>
         <button
           onClick={() => setViewMode("3D_ISOMETRIC")}
-          className={`rounded-lg px-2.5 py-1 flex items-center gap-1 transition-all ${
-            viewMode !== "2D"
+          className={`rounded-lg px-2 py-1 flex items-center gap-1 transition-all ${
+            viewMode === "3D_ISOMETRIC" || viewMode === "3D_FIRST_PERSON"
               ? "bg-[#1E3A34] text-white shadow-xs"
               : "text-stone-600 hover:text-stone-900"
           }`}
-          title="3D Spatial WebGL Architectural Visualizer"
+          title="3D Spatial WebGL Architectural Scene"
         >
           <Box className="h-3 w-3 text-amber-300" />
           <span>3D View</span>
+        </button>
+        <button
+          onClick={() => setViewMode("ELEVATION_CAD")}
+          className={`rounded-lg px-2 py-1 flex items-center gap-1 transition-all ${
+            viewMode === "ELEVATION_CAD"
+              ? "bg-[#1E3A34] text-white shadow-xs"
+              : "text-stone-600 hover:text-stone-900"
+          }`}
+          title="CAD Orthographic Technical Elevation with Datum Levels & Dimensions"
+        >
+          <Building className="h-3 w-3 text-sky-400" />
+          <span>CAD Elevation</span>
+        </button>
+        <button
+          onClick={() => setViewMode("ARCHITECTURAL_VIEW")}
+          className={`rounded-lg px-2 py-1 flex items-center gap-1 transition-all ${
+            viewMode === "ARCHITECTURAL_VIEW"
+              ? "bg-[#1E3A34] text-white shadow-xs"
+              : "text-stone-600 hover:text-stone-900"
+          }`}
+          title="Floor Plan to Architectural Façade Visualizer & AI Suggester"
+        >
+          <Sparkles className="h-3 w-3 text-amber-400" />
+          <span>Façade View</span>
         </button>
       </div>
     </div>

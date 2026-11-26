@@ -19,7 +19,7 @@ interface EditorState {
   showPlumbing: boolean;
   showLighting: boolean;
   showHvac: boolean;
-  viewMode: "2D" | "3D_ISOMETRIC" | "3D_FIRST_PERSON";
+  viewMode: "2D" | "3D_ISOMETRIC" | "3D_FIRST_PERSON" | "ELEVATION_CAD" | "ARCHITECTURAL_VIEW";
   activeTool: "select" | "draw_room" | "wall" | "door" | "window" | "measure" | "pan";
   zoom: number;
   stagePos: { x: number; y: number };

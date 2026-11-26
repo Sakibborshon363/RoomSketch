@@ -57,6 +57,8 @@ export function EditorToolbar({
     setShowGrid,
     showMeasurements,
     setShowMeasurements,
+    viewMode,
+    setViewMode,
   } = useEditorStore();
 
   const { user } = useAuthStore();
@@ -185,13 +187,53 @@ export function EditorToolbar({
           )}
         </div>
 
-        {/* 2D / 3D Mode Switcher (Matching Reference Image) */}
+        {/* Architectural Transition View Switcher (2D Plan -> 3D Spatial -> CAD Elevation -> Façade View) */}
         <div className="flex items-center rounded-xl border border-stone-200 bg-stone-100/80 p-0.5 text-xs font-bold text-stone-600">
-          <span className="rounded-lg bg-white px-3 py-1 text-stone-900 shadow-xs">2D</span>
-          <span className="px-3 py-1 text-stone-400 cursor-not-allowed flex items-center gap-1">
-            3D <span className="text-[9px] uppercase font-bold text-[#1E3A34]">Beta</span>
-          </span>
-          <span className="px-2.5 py-1 text-stone-400 cursor-not-allowed">Split</span>
+          <button
+            onClick={() => setViewMode("2D")}
+            className={`rounded-lg px-2.5 py-1 transition-all ${
+              viewMode === "2D"
+                ? "bg-white text-stone-900 shadow-xs"
+                : "text-stone-500 hover:text-stone-900"
+            }`}
+            title="2D Floor Plan CAD Mode"
+          >
+            2D
+          </button>
+          <button
+            onClick={() => setViewMode("3D_ISOMETRIC")}
+            className={`rounded-lg px-2.5 py-1 transition-all ${
+              viewMode === "3D_ISOMETRIC" || viewMode === "3D_FIRST_PERSON"
+                ? "bg-white text-stone-900 shadow-xs"
+                : "text-stone-500 hover:text-stone-900"
+            }`}
+            title="3D Spatial Visualizer"
+          >
+            3D
+          </button>
+          <button
+            onClick={() => setViewMode("ELEVATION_CAD")}
+            className={`rounded-lg px-2 py-1 transition-all ${
+              viewMode === "ELEVATION_CAD"
+                ? "bg-white text-stone-900 shadow-xs font-black"
+                : "text-stone-500 hover:text-stone-900"
+            }`}
+            title="Orthographic CAD Elevation View (Datum Levels & Dimensions)"
+          >
+            CAD Elev
+          </button>
+          <button
+            onClick={() => setViewMode("ARCHITECTURAL_VIEW")}
+            className={`rounded-lg px-2 py-1 transition-all flex items-center gap-1 ${
+              viewMode === "ARCHITECTURAL_VIEW"
+                ? "bg-[#1E3A34] text-white shadow-xs font-black"
+                : "text-stone-500 hover:text-stone-900"
+            }`}
+            title="Photorealistic Architectural Façade View & AI Suggester"
+          >
+            <span>Façade</span>
+            <span className="text-[8px] bg-amber-400 text-stone-950 px-1 py-0.2 rounded font-bold">AI</span>
+          </button>
         </div>
 
         {/* Grid & Ruler Measurement Toggles */}
